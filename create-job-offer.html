@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objava Ponude - BeatSync Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/navbar.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <beat-sync-navbar></beat-sync-navbar>
+
+    <main class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="bg-gray-800 rounded-lg p-8">
+            <h1 class="text-3xl font-bold mb-6 text-center">Objava Nove Ponude</h1>
+            
+            <form class="space-y-6" id="jobOfferForm">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="jobTitle" class="block text-sm font-medium mb-2">Naziv ponude</label>
+                        <input type="text" id="jobTitle" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" placeholder="npr. Club Electro Night" required>
+                    </div>
+                    
+                    <div>
+                        <label for="jobDate" class="block text-sm font-medium mb-2">Datum</label>
+                        <input type="date" id="jobDate" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                    </div>
+                    
+                    <div>
+                        <label for="jobBudget" class="block text-sm font-medium mb-2">Budžet (€)</label>
+                        <input type="number" id="jobBudget" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" placeholder="300" required>
+                    </div>
+                    
+                    <div>
+                        <label for="startTime" class="block text-sm font-medium mb-2">Početak</label>
+                        <input type="time" id="startTime" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                    </div>
+                    
+                    <div>
+                        <label for="endTime" class="block text-sm font-medium mb-2">Kraj</label>
+                        <input type="time" id="endTime" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="jobLocation" class="block text-sm font-medium mb-2">Lokacija</label>
+                        <input type="text" id="jobLocation" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" placeholder="npr. Zagreb, Centar" required>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-2">Žanr glazbe</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> EDM
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> House
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> Techno
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> Trance
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> Hip-Hop
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> Pop
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> R&B
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> Dubstep
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2"> Drum & Bass
+                            </label>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-2">Zahtjevi za opremom</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center justify-between">
+                                <span>Vlastiti zvučnici</span>
+                                <input type="checkbox" class="ml-2">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>CO2 Cannon</span>
+                                <input type="checkbox" class="ml-2">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Aparat za pjenu</span>
+                                <input type="checkbox" class="ml-2">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Vlastita mikseta</span>
+                                <input type="checkbox" class="ml-2">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Ostalo</span>
+                                <input type="text" placeholder="Specify..." class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 ml-2">
+                            </div>
+                        </div>
+                    </div>
+<div class="md:col-span-2">
+                        <label for="jobDescription" class="block text-sm font-medium mb-2">Opis posla</label>
+                        <textarea id="jobDescription" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" placeholder="Detaljan opis posla, očekivanja, itd." required></textarea>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="experienceRequired" class="block text-sm font-medium mb-2">Potrebno iskustvo</label>
+                        <input type="text" id="experienceRequired" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" placeholder="npr. 3+ godine" required>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium">
+                        <i data-feather="send" class="w-4 h-4 mr-2"></i>
+                        Objavi Ponudu
+                    </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        feather.replace();
+        
+        const jobOfferForm = document.getElementById('jobOfferForm');
+        
+        jobOfferForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // In real implementation, this would submit to your API
+            alert('Ponuda je uspješno objavljena!');
+            window.location.href = 'job-offers.html';
+        });
+        
+        // Calculate total hours
+        const startTime = document.getElementById('startTime');
+        const endTime = document.getElementById('endTime');
+        const totalHoursDisplay = document.createElement('div');
+        totalHoursDisplay.className = 'text-sm text-purple-400 mt-1';
+        
+        function calculateTotalHours() {
+            if (startTime.value && endTime.value) {
+                const start = new Date(`1970-01-01T${startTime.value}`);
+                const end = new Date(`1970-01-01T${endTime.value}`);
+                
+                let diff = (end - start) / (1000 * 60 * 60);
+                if (diff < 0) {
+                    diff += 24; // Handle overnight events
+                }
+                
+                totalHoursDisplay.textContent = `Ukupno: ${diff} sati`;
+            }
+        }
+        
+        startTime.addEventListener('change', calculateTotalHours);
+        endTime.addEventListener('change', calculateTotalHours);
+        
+        // Insert total hours display after end time input
+        endTime.parentNode.appendChild(totalHoursDisplay);
+    </script>
+</body>
+</html>

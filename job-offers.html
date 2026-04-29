@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponude Poslova - BeatSync Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/navbar.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <beat-sync-navbar></beat-sync-navbar>
+
+    <main class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center">Ponude Poslova</h1>
+        
+        <!-- Create Job Offer Button (Visible for Business Profiles) -->
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-semibold">Dostupne Ponude</h2>
+            <button id="createJobOfferBtn" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium hidden">
+                <i data-feather="plus" class="w-4 h-4 mr-2"></i>
+                Objavi Novu Ponudu
+            </button>
+        </div>
+        
+        <!-- Job Offers Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="jobOffersContainer">
+            <!-- Job offers will be dynamically loaded here -->
+            <div class="bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-semibold">Club Electro Night</h3>
+                    <span class="bg-green-600 text-xs px-2 py-1 rounded">Aktivna</span>
+                </div>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="flex items-center">
+                        <i data-feather="calendar" class="w-4 h-4 mr-2 text-purple-400"></i>
+                        <span>15.12.2023.</span>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <i data-feather="clock" class="w-4 h-4 mr-2 text-purple-400"></i>
+                        <span>22:00 - 04:00 (6 sati)</span>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <i data-feather="map-pin" class="w-4 h-4 mr-2 text-purple-400"></i>
+                        <span>Zagreb, Centar</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="font-medium mb-2">Zahtjevi:</h4>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Žanr: EDM, House</li>
+                        <li>• Oprema: CDJ-2000NXS2, DJM-900NXS2</li>
+                        <li>• Iskustvo: 3+ godine</li>
+                        <li>• Dodatno: Light show</li>
+                        </ul>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-purple-400 font-medium">300€</span>
+                    <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm">
+                            Prijavi se
+                        </button>
+                </div>
+            </div>
+            
+            <!-- More job offer cards would be dynamically loaded here -->
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-12 hidden">
+                <i data-feather="briefcase" class="w-16 h-16 mx-auto mb-4 text-gray-600"></i>
+                <h3 class="text-xl font-semibold mb-2">Nema dostupnih ponuda</h3>
+                <p class="text-gray-400">Trenutno nema aktivnih ponuda poslova.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        feather.replace();
+        
+        // Simulate user authentication state
+        // In real implementation, this would come from your auth system
+        const userType = 'dj'; // 'dj' or 'business'
+        
+        const createJobOfferBtn = document.getElementById('createJobOfferBtn');
+        const emptyState = document.getElementById('emptyState');
+        const jobOffersContainer = document.getElementById('jobOffersContainer');
+        
+        // Show create button only for business profiles
+        if (userType === 'business') {
+            createJobOfferBtn.classList.remove('hidden');
+        }
+        
+        // Load job offers based on user type
+        function loadJobOffers() {
+            // In real implementation, this would fetch from your API
+            if (userType === 'dj') {
+                // DJs see all available job offers
+                // For demo, we'll show the sample card
+                emptyState.classList.add('hidden');
+                jobOffersContainer.classList.remove('hidden');
+            } else {
+                // Business profiles see only their own offers
+                // For demo, we'll show empty state
+                emptyState.classList.remove('hidden');
+                jobOffersContainer.classList.add('hidden');
+            }
+        }
+        
+        loadJobOffers();
+        
+        // Create job offer functionality
+        createJobOfferBtn.addEventListener('click', () => {
+            // Redirect to create job offer page
+            window.location.href = 'create-job-offer.html';
+        });
+    </script>
+</body>
+</html>

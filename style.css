@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom purple color */
+.bg-purple-600 {
+    background-color: #7c3aed;
+}
+.hover\:bg-purple-700:hover {
+    background-color: #6d28d9;
+}
+.text-purple-400 {
+    color: #a78bfa;
+}

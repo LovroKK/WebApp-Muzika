@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cijene - BeatSync Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/navbar.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <beat-sync-navbar></beat-sync-navbar>
+
+    <main class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center">Cijene</h1>
+        
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <div class="bg-gray-800 rounded-lg p-8 text-center">
+                <h3 class="text-2xl font-bold mb-4">Osnovni</h3>
+                <p class="text-4xl font-bold mb-6">Besplatno</p>
+                <ul class="space-y-3 mb-8">
+                <li>✓ Osnovni DJ profil</li>
+                <li>✓ Pregledavanje ponuda</li>
+                <li>✓ Osnovni chat</li>
+                <li>✗ Napredne opcije</li>
+                <li>✗ Premium podrška</li>
+            </ul>
+                <button class="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-medium">
+                    Odaberi
+                </button>
+            </div>
+            
+            <div class="bg-purple-600 rounded-lg p-8 text-center transform scale-105">
+                <h3 class="text-2xl font-bold mb-4">Premium</h3>
+                <p class="text-4xl font-bold mb-6">9,99€<span class="text-lg">/mjesec</span></p>
+                <ul class="space-y-3 mb-8">
+                <li>✓ Sve iz Osnovnog</li>
+                <li>✓ Istaknuti profil</li>
+                <li>✓ Napredni chat</li>
+                <li>✓ Prioritetna podrška</li>
+                <li>✓ Statistike pregleda</li>
+            </ul>
+                <button class="w-full bg-white text-purple-600 hover:bg-gray-100 py-3 rounded-lg font-medium">
+                    Odaberi
+                </button>
+            </div>
+            
+            <div class="bg-gray-800 rounded-lg p-8 text-center">
+                <h3 class="text-2xl font-bold mb-4">Business</h3>
+                <p class="text-4xl font-bold mb-6">29,99€<span class="text-lg">/mjesec</span></p>
+                <ul class="space-y-3 mb-8">
+                <li>✓ Sve iz Premium</li>
+                <li>✓ Objava ponuda</li>
+                <li>✓ Upravljanje rezervacijama</li>
+                <li>✓ Analitika poslovanja</li>
+                <li>✓ Dedicated account manager</li>
+            </ul>
+                <button class="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-medium">
+                    Odaberi
+                </button>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-8">
+            <h2 class="text-2xl font-bold mb-6">Dodatne usluge</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Oprema</h3>
+                    <p class="text-gray-400">Cijene opreme variraju ovisno o vrsti i kvaliteti. Prosječne cijene:</p>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>• Mikseri: 50-150€/dan</li>
+                        <li>• Zvučnici: 80-250€/dan</li>
+                        <li>• Rasvjeta: 100-300€/dan</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">DJ-evi</h3>
+                    <p class="text-gray-400">Cijene DJ-eva variraju ovisno o iskustvu i popularnosti. Prosječne cijene:</p>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>• Početnici: 50-100€/sat</li>
+                        <li>• Profesionalci: 100-250€/sat</li>
+                        <li>• Superstar DJ-evi: 250€+/sat</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>

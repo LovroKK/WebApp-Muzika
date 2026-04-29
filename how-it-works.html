@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kako funkcionira - BeatSync Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/navbar.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <beat-sync-navbar></beat-sync-navbar>
+
+    <main class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center">Kako funkcionira BeatSync Connect</h1>
+        
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <div class="bg-gray-800 p-6 rounded-lg text-center">
+                <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="user-plus" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">1. Registracija</h3>
+                <p>Stvorite svoj profil kao DJ ili klub</p>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-lg text-center">
+                <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="search" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">2. Pregledaj</h3>
+                <p>Pronađite DJ-eve ili opremu za vaš događaj</p>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-lg text-center">
+                <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="message-circle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">3. Komuniciraj</h3>
+                <p>Direktno se povežite i dogovorite detalje</p>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-lg text-center">
+                <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="check-circle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">4. Rezerviraj</h3>
+                <p>Sigurno rezervirajte i plati putem platforme</p>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-lg text-center">
+                <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="calendar" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">5. Uživaj</h3>
+                <p>Odmorite se i uživajte u savršenom događaju</p>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-lg text-center">
+                <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="star" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">6. Ocijeni</h3>
+                <p>Podijelite svoje iskustvo i pomozite drugima</p>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-8">
+            <h2 class="text-2xl font-bold mb-6">Često postavljana pitanja</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Kako funkcioniraju plaćanja?</h3>
+                    <p class="text-gray-400">Sva plaćanja se obrađuju putem naše sigurne platforme. Novac se oslobađa DJ-u ili klubu nakon uspješno održanog događaja.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Mogu li otkazati rezervaciju?</h3>
+                    <p class="text-gray-400">Politika otkazivanja ovisi o DJ-u ili klubu. Pregledajte uvjete prije rezervacije.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Kako komunicirati s DJ-em?</h3>
+                    <p class="text-gray-400">Nakon rezervacije, možete direktno komunicirati putem našeg chat sustava.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
