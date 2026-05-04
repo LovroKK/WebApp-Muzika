@@ -6,6 +6,24 @@ class BeatSyncNavbar extends HTMLElement {
                 .navbar-link:hover {
                     color: #a78bfa;
                 }
+                .chat-icon-btn:hover {
+                    background-color: #4b5563;
+                }
+                .notification-badge {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    background-color: #ef4444;
+                    color: white;
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 12px;
+                    font-weight: bold;
+                }
             </style>
             <nav class="bg-gray-800 py-4 px-6 shadow-lg">
                 <div class="container mx-auto flex justify-between items-center">
@@ -21,12 +39,16 @@ class BeatSyncNavbar extends HTMLElement {
                         <a href="profile.html" class="navbar-link text-gray-300 hover:text-purple-400">Profil</a>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <a href="auth.html" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                        <a href="auth.html" id="loginBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-medium transition-colors">
                             Prijava
                         </a>
                         <a href="profile.html" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors hidden" id="profileBtn">
                             Profil
                         </a>
+                        <button id="chatBtn" class="chat-icon-btn bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-colors hidden relative" title="Poruke">
+                            <i data-feather="message-circle" class="w-6 h-6 text-purple-400"></i>
+                            <span class="notification-badge hidden" id="notificationBadge">3</span>
+                        </button>
                         <button class="md:hidden">
                             <i data-feather="menu"></i>
                         </button>
@@ -53,6 +75,65 @@ class BeatSyncNavbar extends HTMLElement {
                 mobileMenu.classList.toggle('hidden');
             });
         }
+
+        // Check login state on page load
+        this.checkLoginState();
+
+        // Listen for login/logout events
+        window.addEventListener('userLoggedIn', () => this.checkLoginState());
+        window.addEventListener('userLoggedOut', () => this.checkLoginState());
+
+        // Add chat button click handler
+        const chatBtn = this.querySelector('#chatBtn');
+        if (chatBtn) {
+            chatBtn.addEventListener('click', () => {
+                console.log('Chat/Messages clicked');
+                // TODO: Navigate to messages page or open messages modal
+            });
+        }
+    }
+
+    checkLoginState() {
+        const isLoggedIn = localStorage.getItem('user_logged_in') === 'true';
+        const loginBtn = this.querySelector('#loginBtn');
+        const profileBtn = this.querySelector('#profileBtn');
+        const chatBtn = this.querySelector('#chatBtn');
+
+        if (isLoggedIn) {
+            loginBtn.classList.add('hidden');
+            profileBtn.classList.remove('hidden');
+            chatBtn.classList.remove('hidden');
+        } else {
+            loginBtn.classList.remove('hidden');
+            profileBtn.classList.add('hidden');
+            chatBtn.classList.add('hidden');
+        }
+
+        // Feather icons need to be replaced after DOM updates
+        feather.replace();
+    }
+
+    setLoginState(loggedIn) {
+        if (loggedIn) {
+            localStorage.setItem('user_logged_in', 'true');
+            window.dispatchEvent(new Event('userLoggedIn'));
+        } else {
+            localStorage.removeItem('user_logged_in');
+            window.dispatchEvent(new Event('userLoggedOut'));
+        }
+    }
+
+    updateNotificationBadge(count) {
+        const badge = this.querySelector('#notificationBadge');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
     }
 }
+customElements.define('beat-sync-navbar', BeatSyncNavbar);
 customElements.define('beat-sync-navbar', BeatSyncNavbar);
