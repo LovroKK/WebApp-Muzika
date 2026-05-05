@@ -31,8 +31,8 @@ class BeatSyncNavbar extends HTMLElement {
                         <span class="text-2xl font-bold text-purple-400">BeatSync</span>
                     </a>
                     <div class="hidden md:flex space-x-8">
-                        <a href="index.html#dj-list" class="navbar-link text-gray-300 hover:text-purple-400">DJ-evi</a>
-                        <a href="index.html#equipment" class="navbar-link text-gray-300 hover:text-purple-400">Oprema</a>
+                        <a href="djs.html" class="navbar-link text-gray-300 hover:text-purple-400">DJ-evi</a>   
+                        <a href="equipment.html" class="navbar-link text-gray-300 hover:text-purple-400">Oprema</a>
                         <a href="job-offers.html" class="navbar-link text-gray-300 hover:text-purple-400">Ponude Poslova</a>
                         <a href="how-it-works.html" class="navbar-link text-gray-300 hover:text-purple-400">Kako funkcionira</a>
                         <a href="pricing.html" class="navbar-link text-gray-300 hover:text-purple-400">Cijene</a>
@@ -56,8 +56,8 @@ class BeatSyncNavbar extends HTMLElement {
 </div>
                 <!-- Mobile menu -->
                 <div class="md:hidden hidden mt-4 space-y-2" id="mobile-menu">
-                            <a href="index.html#dj-list" class="block px-2 py-1 text-gray-300 hover:text-purple-400">DJ-evi</a>
-                            <a href="index.html#equipment" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Oprema</a>
+                            <a href="djs.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">DJ-evi</a>
+                            <a href="equipment.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Oprema</a>               
                             <a href="job-offers.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Ponude Poslova</a>
                             <a href="how-it-works.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Kako funkcionira</a>
                             <a href="pricing.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Cijene</a>
