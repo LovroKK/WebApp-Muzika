@@ -7,18 +7,26 @@ class BeatSyncChat extends HTMLElement {
 
     connectedCallback() {
         this.render();
-        this.addEventListeners();
     }
 
     render() {
         this.shadowRoot.innerHTML = `
             <style>
+                :host {
+                    all: initial;
+                    font-family: Arial, sans-serif;
+                }
+
                 .chat-container {
                     position: fixed;
                     bottom: 20px;
                     right: 20px;
-                    z-index: 50;
-                }
+                    z-index: 15;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    gap: 10px;                    pointer-events: none;                }       
+
                 .chat-window {
                     width: 350px;
                     height: 500px;
@@ -26,13 +34,21 @@ class BeatSyncChat extends HTMLElement {
                     border-radius: 12px;
                     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
                     transition: all 0.3s ease;
-                    transform: translateY(100%);
+                    transform: translateY(20px);
                     opacity: 0;
+
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    pointer-events: none;
                 }
+
                 .chat-window.open {
                     transform: translateY(0);
                     opacity: 1;
+                    pointer-events: auto;
                 }
+
                 .chat-toggle {
                     width: 60px;
                     height: 60px;
@@ -43,39 +59,67 @@ class BeatSyncChat extends HTMLElement {
                     justify-content: center;
                     cursor: pointer;
                     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
-                    position: absolute;
-                    bottom: 0;
-                    right: 0;
+                    border: none;
+                    pointer-events: auto;
                 }
+
                 .chat-header {
                     background: #374151;
                     padding: 1rem;
-                    border-radius: 12px 12px 0 0;
                 }
+
                 .chat-tabs {
                     display: flex;
                     border-bottom: 1px solid #4b5563;
                 }
+
                 .chat-tab {
                     flex: 1;
                     padding: 0.75rem;
                     text-align: center;
                     cursor: pointer;
                     color: #d1d5db;
+                    user-select: none;
                 }
+
                 .chat-tab.active {
                     color: #a78bfa;
                     border-bottom: 2px solid #a78bfa;
                 }
+
                 .chat-content {
-                    height: 350px;
+                    flex: 1;
                     overflow-y: auto;
                     padding: 1rem;
+                    color: #d1d5db;
                 }
+
                 .chat-input {
                     padding: 1rem;
                     border-top: 1px solid #4b5563;
+                    flex-shrink: 0;
                 }
+
+                .input-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                .input-row input {
+                    flex: 1;
+                    background: #374151;
+                    border: 1px solid #4b5563;
+                    border-radius: 8px;
+                    padding: 0.75rem;
+                    color: white;
+                    outline: none;
+                }
+
+                .input-row input::placeholder {
+                    color: #9ca3af;
+                }
+
                 .new-message-btn {
                     width: 40px;
                     height: 40px;
@@ -85,58 +129,72 @@ class BeatSyncChat extends HTMLElement {
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
-                    margin-left: auto;
+                    border: none;
+                    flex-shrink: 0;
+                }
+
+                svg {
+                    width: 20px;
+                    height: 20px;
+                    stroke: white;
                 }
             </style>
+
             <div class="chat-container">
                 <div class="chat-window ${this.isOpen ? 'open' : ''}">
                     <div class="chat-header">
                         <div class="chat-tabs">
                             <div class="chat-tab active">Poruke</div>
+                        </div>
                     </div>
+
                     <div class="chat-content">
-                        <p class="text-center text-gray-400">Nema poruka</p>
+                        <p style="text-align:center; color:#9ca3af;">Nema poruka</p>
                     </div>
+
                     <div class="chat-input">
-                        <div class="flex items-center gap-2">
-                            <input type="text" placeholder="Napišite poruku..." class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm">
-                            <button class="new-message-btn">
-                                <i data-feather="plus"></i>
+                        <div class="input-row">
+                            <input type="text" placeholder="Napišite poruku...">
+                            <button class="new-message-btn" type="button" aria-label="Nova poruka">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class="chat-toggle">
-                    <i data-feather="message-circle"></i>
-                </div>
+
+                <button class="chat-toggle" type="button" aria-label="Otvori chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 5V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+                    </svg>
+                </button>
             </div>
         `;
+
+        this.addEventListeners();
     }
 
     addEventListeners() {
         const toggle = this.shadowRoot.querySelector('.chat-toggle');
         const newMessageBtn = this.shadowRoot.querySelector('.new-message-btn');
-        
-        toggle.addEventListener('click', () => {
-            this.isOpen = !this.isOpen;
-            this.render();
-            this.addEventListeners();
-            
-            if (this.isOpen) {
-                feather.replace();
-            }
-        });
-        
+
+        if (toggle) {
+            toggle.addEventListener('click', () => {
+                this.isOpen = !this.isOpen;
+                this.render();
+            });
+        }
+
         if (newMessageBtn) {
             newMessageBtn.addEventListener('click', () => {
-                // Open new message dialog
                 this.openNewMessageDialog();
             });
         }
     }
 
     openNewMessageDialog() {
-        // Implementation for new message dialog
         console.log('Open new message dialog');
     }
 }

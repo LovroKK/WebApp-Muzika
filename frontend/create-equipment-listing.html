@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kreiraj oglas za opremu - BeatSync Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/navbar.js"></script>
+    <script src="components/equipment.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <beat-sync-navbar></beat-sync-navbar>
+
+    <main class="container mx-auto px-4 py-8 max-w-3xl">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-xl">
+            <div class="flex items-start justify-between gap-4 mb-8 flex-col md:flex-row">
+                <div>
+                    <p class="text-purple-400 font-medium mb-2">Nova objava</p>
+                    <h1 class="text-3xl font-bold">Kreiraj oglas za opremu</h1>
+                    <p class="text-gray-400 mt-2 max-w-2xl">
+                        Unesi podatke koji odgovaraju tablicama <span class="text-gray-200">Oprema</span> i <span class="text-gray-200">Oprema_lokacije</span>.
+                        Jedan oglas može imati više lokacija dostupnosti.
+                    </p>
+                </div>
+                <a href="equipment.html" class="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg font-medium transition-colors">
+                    <i data-feather="arrow-left" class="w-4 h-4"></i>
+                    Natrag na opremu
+                </a>
+            </div>
+
+            <div id="successMessage" class="hidden mb-6 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-green-300"></div>
+            <div id="errorMessage" class="hidden mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300"></div>
+
+            <form id="equipmentListingForm" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="nazivOpreme" class="block text-sm font-medium mb-2">Naziv opreme</label>
+                        <input type="text" id="nazivOpreme" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500" placeholder="npr. Pioneer DJM-900NXS2" required>
+                    </div>
+
+                    <div>
+                        <label for="cijena" class="block text-sm font-medium mb-2">Cijena po danu (€)</label>
+                        <input type="number" id="cijena" min="0" step="0.01" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500" placeholder="80" required>
+                    </div>
+
+                    <div>
+                        <label for="kategorija" class="block text-sm font-medium mb-2">Kategorija</label>
+                        <select id="kategorija" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500" required>
+                            <option value="">Odaberi kategoriju</option>
+                            <option value="Mixeri">Mixeri</option>
+                            <option value="Playeri">Playeri</option>
+                            <option value="Rasvjeta">Rasvjeta</option>
+                            <option value="Zvučnici">Zvučnici</option>
+                            <option value="Mikrofoni">Mikrofoni</option>
+                            <option value="Kontroleri">Kontroleri</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="slika" class="block text-sm font-medium mb-2">Slika opreme</label>
+                        <input type="file" id="slika" accept="image/*" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 file:mr-4 file:rounded-md file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-white hover:file:bg-purple-700 focus:outline-none focus:border-purple-500">
+                        <p class="text-xs text-gray-400 mt-2">Odaberi sliku s računala. Ako ne odabereš sliku, koristit će se zadana ilustracija.</p>
+                        <div id="imagePreviewWrapper" class="hidden mt-4">
+                            <p class="text-sm text-gray-300 mb-2">Pregled odabrane slike</p>
+                            <img id="imagePreview" src="" alt="Pregled slike opreme" class="w-full max-w-xs h-48 object-cover rounded-lg border border-gray-600">
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="lokacije" class="block text-sm font-medium mb-2">Lokacije dostupnosti</label>
+                        <textarea id="lokacije" rows="5" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500" placeholder="Zagreb&#10;Split&#10;Rijeka" required></textarea>
+                        <p class="text-xs text-gray-400 mt-2">Unesi jednu lokaciju po retku. Svaki red će se spremiti kao zaseban zapis u <span class="text-gray-200">Oprema_lokacije</span>.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900/60 border border-gray-700 rounded-xl p-5">
+                    <h2 class="text-lg font-semibold mb-3">Pregled strukture podataka</h2>
+                    <ul class="text-sm text-gray-300 space-y-2">
+                        <li><span class="text-purple-400">Oprema</span>: naziv_opreme, cijena, kategorija, slika, vlasnik_opreme</li>
+                        <li><span class="text-purple-400">Oprema_lokacije</span>: više lokacija povezanih na jedan id_opreme</li>
+                    </ul>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium transition-colors">
+                        <i data-feather="save" class="w-4 h-4"></i>
+                        Spremi oglas
+                    </button>
+                    <a href="equipment.html" class="inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg font-medium transition-colors">
+                        Odustani
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="components/equipment.js"></script>
+</body>
+</html>

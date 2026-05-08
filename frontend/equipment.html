@@ -7,23 +7,37 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
-    <script src="components/navbar.js"></script>
-    <script src="components/equipment-card.js"></script>
+        <script src="components/navbar.js"></script>
     <script src="components/chat.js"></script>
+    <script src="components/equipment.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
     <beat-sync-navbar></beat-sync-navbar>
     
     <main class="relative pt-16 min-h-screen">
-        <div class="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-gray-900 to-gray-900">
-            <div class="absolute inset-0 bg-[url('http://static.photos/nightlife/1200x630/1')] bg-cover bg-center opacity-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-gray-900 to-gray-900 pointer-events-none">
+            <div class="absolute inset-0 bg-[url('http://static.photos/nightlife/1200x630/1')] bg-cover bg-center opacity-10 pointer-events-none"></div>
         </div>
         
         <div class="container mx-auto px-4 py-8 relative z-10">
             <!-- Page Header -->
-            <section class="mb-12 text-center">
+                        <section class="mb-12 text-center">
                 <h1 class="text-4xl font-bold mb-4">Iznajmljivanje Opreme</h1>
                 <p class="text-xl text-gray-400 max-w-2xl mx-auto">Premium DJ oprema i rasvjeta za vaš događaj. Konkurentne cijene i profesionalna kvaliteta.</p>
+            </section>
+
+            <section class="mb-10">
+                <div class="flex flex-col md:flex-row gap-4 justify-between items-center bg-gray-800/80 border border-gray-700 rounded-2xl p-5">
+                    <div>
+                        <h2 class="text-2xl font-semibold">Dostupni oglasi za opremu</h2>
+                        <p class="text-gray-400 mt-1">Pregledaj postojeće oglase ili objavi novu opremu za najam.</p>
+                    </div>
+                    <a href="create-equipment-listing.html" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-lg font-medium transition-colors whitespace-nowrap">
+                        <i data-feather="plus" class="w-4 h-4"></i>
+                        Objavi novu opremu
+                    </a>
+                </div>
+                <div id="listingCreatedMessage" class="hidden mt-4 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-green-300"></div>
             </section>
 
             <!-- Search & Categories -->
@@ -34,90 +48,23 @@
                         class="w-full bg-gray-800 border border-gray-700 rounded-full py-3 pl-12 pr-4 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition">
                 </div>
                 <div class="flex flex-wrap gap-3 justify-center" id="category-filters">
-                    <button class="filter-btn bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="all">Sva oprema</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Mixer">Mixeri</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Player">Playeri</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Light">Rasvjeta</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Speaker">Zvučnici</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Microphone">Mikrofoni</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Controller">Kontroleri</button>
+                                        <button class="filter-btn bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="all">Sva oprema</button>
+                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Mixeri">Mixeri</button>
+                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Playeri">Playeri</button>
+                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Rasvjeta">Rasvjeta</button>
+                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Zvučnici">Zvučnici</button>
+                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Mikrofoni">Mikrofoni</button>
+                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-category="Kontroleri">Kontroleri</button>
                 </div>
             </section>
 
-            <!-- Equipment Grid -->
+                        <!-- Equipment Grid -->
             <section class="mb-16">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <equipment-card 
-                        class="equipment-item"
-                        data-category="Mixer"
-                        name="Pioneer DJM-900NXS2" 
-                        price="80" 
-                        category="Mixer" 
-                        image="http://static.photos/technology/200x200/1">
-                    </equipment-card>
-                    
-                    <equipment-card 
-                        class="equipment-item"
-                        data-category="Light"
-                        name="Martin MAC Aura" 
-                        price="120" 
-                        category="Moving Light" 
-                        image="http://static.photos/technology/200x200/2">
-                    </equipment-card>
-                    
-                    <equipment-card 
-                        class="equipment-item"
-                        data-category="Player"
-                        name="Pioneer CDJ-3000" 
-                        price="100" 
-                        category="Player" 
-                        image="http://static.photos/technology/200x200/3">
-                    </equipment-card>
-                    
-                    <equipment-card 
-                        class="equipment-item"
-                        data-category="Speaker"
-                        name="JBL SRX835P" 
-                        price="90" 
-                        category="Speaker" 
-                        image="http://static.photos/technology/200x200/4">
-                    </equipment-card>
-                    
-                    <equipment-card 
-                        class="equipment-item"
-                        data-category="Microphone"
-                        name="Shure SM58" 
-                        price="25" 
-                        category="Microphone" 
-                        image="http://static.photos/technology/200x200/5">
-                    </equipment-card>
-                    
-                    <equipment-card 
-                        class="equipment-item"
-                        data-category="Light"
-                        name="Chauvet DJ GigBAR" 
-                        price="70" 
-                        category="Light System" 
-                        image="http://static.photos/technology/200x200/6">
-                    </equipment-card>
-                    
-                    <equipment-card 
-                        class="equipment-item"
-                        data-category="Mixer"
-                        name="Allen & Heath Xone:96" 
-                        price="85" 
-                        category="Mixer" 
-                        image="http://static.photos/technology/200x200/7">
-                    </equipment-card>
-                    
-                    <equipment-card 
-                        class="equipment-item"
-                        data-category="Controller"
-                        name="Pioneer DDJ-FLX10" 
-                        price="95" 
-                        category="Controller" 
-                        image="http://static.photos/technology/200x200/8">
-                    </equipment-card>
+                <div id="equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+                <div id="emptyEquipmentState" class="hidden text-center py-12">
+                    <i data-feather="package" class="w-16 h-16 mx-auto mb-4 text-gray-600"></i>
+                    <h3 class="text-xl font-semibold mb-2">Nema opreme za prikaz</h3>
+                    <p class="text-gray-400">Pokušaj promijeniti filtere ili objavi novi oglas za opremu.</p>
                 </div>
             </section>
             
@@ -191,48 +138,6 @@
     
     <beat-sync-chat></beat-sync-chat>
     
-    <script>
-        feather.replace();
-
-        // Filter and Search logic
-        const equipmentCards = document.querySelectorAll('.equipment-item');
-        const filterBtns = document.querySelectorAll('#category-filters .filter-btn');
-        const searchInput = document.getElementById('equipment-search');
-
-        function filterEquipment() {
-            const activeBtn = document.querySelector('#category-filters .filter-btn.bg-purple-600');
-            const selectedCategory = activeBtn ? activeBtn.dataset.category : 'all';
-            const query = searchInput.value.toLowerCase().trim();
-
-            equipmentCards.forEach(card => {
-                const category = card.dataset.category;
-                const name = (card.getAttribute('name') || '').toLowerCase();
-                const matchesCategory = selectedCategory === 'all' || category === selectedCategory;
-                const matchesSearch = !query || name.includes(query);
-                
-                if (matchesCategory && matchesSearch) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Reset styles
-                filterBtns.forEach(b => {
-                    b.classList.remove('bg-purple-600', 'hover:bg-purple-700');
-                    b.classList.add('bg-gray-800', 'hover:bg-gray-700');
-                });
-                // Set active
-                btn.classList.remove('bg-gray-800', 'hover:bg-gray-700');
-                btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-                filterEquipment();
-            });
-        });
-
-        searchInput.addEventListener('input', filterEquipment);
-    </script>
+        <script src="components/equipment.js"></script>
 </body>
 </html>
