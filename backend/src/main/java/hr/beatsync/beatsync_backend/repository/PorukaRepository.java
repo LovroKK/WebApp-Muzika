@@ -1,0 +1,15 @@
+package hr.beatsync.backend.repository;
+
+import hr.beatsync.backend.model.Poruka;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.List;
+
+@Repository
+public interface PorukaRepository extends JpaRepository<Poruka, Integer> {
+    Optional<Poruka> findByIdPoruke(Integer idPoruke);
+    List<Poruka> findByIzvodacPoruka_UsernameIzvodacAndBusinessPoruka_UsernameBusinessOrderByTimestampPorukeAsc(
+        String usernameIzvodac, String usernameBusiness);
+}
