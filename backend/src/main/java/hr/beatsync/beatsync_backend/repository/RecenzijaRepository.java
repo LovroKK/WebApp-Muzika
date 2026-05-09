@@ -8,5 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface RecenzijaRepository extends JpaRepository<Recenzija, Integer> {
-    Optional<Recenzija> findByIdRecenzije(Integer idRecenzije);
 }

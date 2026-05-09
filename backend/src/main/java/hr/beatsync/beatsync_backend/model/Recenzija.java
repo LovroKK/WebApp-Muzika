@@ -16,12 +16,12 @@ import java.time.LocalDateTime;
 public class Recenzija {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_recenzije")
-    private Integer idRecenzije;
+    @Column(name = "id_rezervacije")
+    private Integer idRezervacije;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_rezervacije", nullable = false, unique = true)
+    @MapsId
+    @JoinColumn(name = "id_rezervacije")
     private Rezervacija rezervacija;
 
     @Column(name = "ocjena", nullable = false, precision = 2, scale = 1)
