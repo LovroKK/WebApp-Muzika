@@ -12,113 +12,124 @@
 <body class="bg-gray-900 text-gray-100">
     <beat-sync-navbar></beat-sync-navbar>
 
-    <main class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-8 text-center">Ponude Poslova</h1>
-        
-        <!-- Create Job Offer Button (Visible for Business Profiles) -->
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-semibold">Dostupne Ponude</h2>
-            <button id="createJobOfferBtn" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium hidden">
-                <i data-feather="plus" class="w-4 h-4 mr-2"></i>
-                Objavi Novu Ponudu
-            </button>
+            <h1 class="text-4xl font-bold">Ponude Poslova</h1>
+            <a id="createBtn" href="create-job-offer.html" class="hidden bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium flex items-center gap-2">
+                <i data-feather="plus" class="w-4 h-4"></i>
+                Objavi Ponudu
+            </a>
         </div>
-        
-        <!-- Job Offers Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="jobOffersContainer">
-            <!-- Job offers will be dynamically loaded here -->
-            <div class="bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-xl font-semibold">Club Electro Night</h3>
-                    <span class="bg-green-600 text-xs px-2 py-1 rounded">Aktivna</span>
-                </div>
-                
-                <div class="space-y-3 mb-6">
-                    <div class="flex items-center">
-                        <i data-feather="calendar" class="w-4 h-4 mr-2 text-purple-400"></i>
-                        <span>15.12.2023.</span>
-                    </div>
-                    
-                    <div class="flex items-center">
-                        <i data-feather="clock" class="w-4 h-4 mr-2 text-purple-400"></i>
-                        <span>22:00 - 04:00 (6 sati)</span>
-                    </div>
-                    
-                    <div class="flex items-center">
-                        <i data-feather="map-pin" class="w-4 h-4 mr-2 text-purple-400"></i>
-                        <span>Zagreb, Centar</span>
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <h4 class="font-medium mb-2">Zahtjevi:</h4>
-                    <ul class="text-sm text-gray-400 space-y-1">
-                        <li>• Žanr: EDM, House</li>
-                        <li>• Oprema: CDJ-2000NXS2, DJM-900NXS2</li>
-                        <li>• Iskustvo: 3+ godine</li>
-                        <li>• Dodatno: Light show</li>
-                        </ul>
-                </div>
-                
-                <div class="flex justify-between items-center">
-                    <span class="text-purple-400 font-medium">300€</span>
-                    <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm">
-                            Prijavi se
-                        </button>
-                </div>
-            </div>
-            
-            <!-- More job offer cards would be dynamically loaded here -->
+
+        <div id="loginMsg" class="hidden text-center py-16 text-gray-400">
+            <p class="text-lg mb-4">Prijavite se za pregled ponuda poslova.</p>
+            <a href="auth.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium">Prijava</a>
         </div>
-        
-        <!-- Empty State -->
-        <div id="emptyState" class="text-center py-12 hidden">
-                <i data-feather="briefcase" class="w-16 h-16 mx-auto mb-4 text-gray-600"></i>
-                <h3 class="text-xl font-semibold mb-2">Nema dostupnih ponuda</h3>
-                <p class="text-gray-400">Trenutno nema aktivnih ponuda poslova.</p>
-            </div>
+
+        <div id="jobOffersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <div id="emptyState" class="hidden text-center py-16">
+            <i data-feather="briefcase" class="w-16 h-16 mx-auto mb-4 text-gray-600"></i>
+            <h3 class="text-xl font-semibold mb-2">Nema dostupnih ponuda</h3>
+            <p class="text-gray-400">Trenutno nema aktivnih ponuda poslova.</p>
         </div>
     </main>
 
     <script>
         feather.replace();
-        
-        // Simulate user authentication state
-        // In real implementation, this would come from your auth system
-        const userType = 'dj'; // 'dj' or 'business'
-        
-        const createJobOfferBtn = document.getElementById('createJobOfferBtn');
-        const emptyState = document.getElementById('emptyState');
-        const jobOffersContainer = document.getElementById('jobOffersContainer');
-        
-        // Show create button only for business profiles
-        if (userType === 'business') {
-            createJobOfferBtn.classList.remove('hidden');
+
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+
+        if (!token) {
+            document.getElementById('loginMsg').classList.remove('hidden');
+        } else {
+            if (role === 'BUSINESS') {
+                document.getElementById('createBtn').classList.remove('hidden');
+            }
+            ucitajPonude();
         }
-        
-        // Load job offers based on user type
-        function loadJobOffers() {
-            // In real implementation, this would fetch from your API
-            if (userType === 'dj') {
-                // DJs see all available job offers
-                // For demo, we'll show the sample card
-                emptyState.classList.add('hidden');
-                jobOffersContainer.classList.remove('hidden');
-            } else {
-                // Business profiles see only their own offers
-                // For demo, we'll show empty state
-                emptyState.classList.remove('hidden');
-                jobOffersContainer.classList.add('hidden');
+
+        async function ucitajPonude() {
+            try {
+                const res = await fetch('http://localhost:8080/api/job-offers', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!res.ok) throw new Error();
+
+                const ponude = await res.json();
+                const container = document.getElementById('jobOffersContainer');
+
+                if (ponude.length === 0) {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                    return;
+                }
+
+                container.innerHTML = ponude.map(p => renderKartica(p)).join('');
+                feather.replace();
+            } catch {
+                document.getElementById('jobOffersContainer').innerHTML =
+                    '<p class="col-span-3 text-center text-red-400">Greška pri učitavanju ponuda.</p>';
             }
         }
-        
-        loadJobOffers();
-        
-        // Create job offer functionality
-        createJobOfferBtn.addEventListener('click', () => {
-            // Redirect to create job offer page
-            window.location.href = 'create-job-offer.html';
-        });
+
+        function renderKartica(p) {
+            const datum = p.datum ? new Date(p.datum).toLocaleDateString('hr-HR') : '—';
+            const pocetak = p.pocetak ? p.pocetak.substring(0, 5) : '—';
+            const kraj = p.kraj ? p.kraj.substring(0, 5) : '—';
+            const budzet = p.budzet ? p.budzet + ' €' : 'Po dogovoru';
+
+
+            let akcija = '';
+            if (role === 'IZVODAC') {
+                if (p.jeliPrijavljen) {
+                    akcija = `<button disabled class="bg-gray-600 px-4 py-2 rounded text-sm cursor-not-allowed opacity-60">Prijavljeni ✓</button>`;
+                } else {
+                    akcija = `<button onclick="prijaviSe(${p.idPonude}, this)" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm transition">Prijavi se</button>`;
+                }
+            } else if (role === 'BUSINESS') {
+                akcija = `<span class="text-xs text-gray-400">Vaša ponuda</span>`;
+            }
+
+            return `
+                <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:shadow-lg transition-shadow flex flex-col gap-3">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-semibold leading-tight">${p.nazivPonude}</h3>
+                        <span class="bg-green-700/60 text-green-300 text-xs px-2 py-1 rounded whitespace-nowrap ml-2">Aktivna</span>
+                    </div>
+                    <p class="text-purple-400 text-sm font-medium">${p.nazivKluba} <span class="text-gray-500">(@${p.businessUsername})</span></p>
+                    <div class="space-y-1 text-sm text-gray-300">
+                        <div class="flex items-center gap-2"><i data-feather="calendar" class="w-4 h-4 text-purple-400 flex-shrink-0"></i>${datum}</div>
+                        <div class="flex items-center gap-2"><i data-feather="clock" class="w-4 h-4 text-purple-400 flex-shrink-0"></i>${pocetak} – ${kraj}</div>
+                        <div class="flex items-center gap-2"><i data-feather="map-pin" class="w-4 h-4 text-purple-400 flex-shrink-0"></i>${p.lokacija || '—'}</div>
+                    </div>
+                    ${p.potrebnoIskustvo ? `<p class="text-xs text-gray-400">Iskustvo: ${p.potrebnoIskustvo}</p>` : ''}
+                    ${p.opisPosla ? `<p class="text-sm text-gray-300 line-clamp-2">${p.opisPosla}</p>` : ''}
+                    <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-700">
+                        <span class="text-purple-400 font-semibold">${budzet}</span>
+                        ${akcija}
+                    </div>
+                </div>`;
+        }
+
+        async function prijaviSe(id, btn) {
+            btn.disabled = true;
+            btn.textContent = 'Prijava...';
+            try {
+                const res = await fetch(`http://localhost:8080/api/job-offers/${id}/prijava`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Greška');
+                btn.textContent = 'Prijavljeni ✓';
+                btn.className = 'bg-gray-600 px-4 py-2 rounded text-sm cursor-not-allowed opacity-60';
+            } catch (err) {
+                btn.textContent = err.message;
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
