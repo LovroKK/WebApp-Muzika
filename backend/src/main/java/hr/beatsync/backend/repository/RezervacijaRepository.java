@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface RezervacijaRepository extends JpaRepository<Rezervacija, Integer> {
     Optional<Rezervacija> findByIdRezervacije(Integer idRezervacije);
+    boolean existsByJobOffer_IdPonudeAndIzvodacRezervacija_UsernameIzvodac(Integer idPonude, String usernameIzvodac);
 }

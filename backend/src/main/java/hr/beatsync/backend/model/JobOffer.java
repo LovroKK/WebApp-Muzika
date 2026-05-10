@@ -46,6 +46,15 @@ public class JobOffer {
     @Column(name = "potrebno_iskustvo", length = 500)
     private String potrebnoIskustvo;
 
+    @Column(name = "zanrovi", length = 500)
+    private String zanrovi;
+
+    @Column(name = "oprema_zahtjevi", length = 500)
+    private String opremaZahtjevi;
+
+    @Column(name = "ostalo_oprema", length = 500)
+    private String ostaloOprema;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username_business", nullable = false)
     private BusinessKorisnik businessPonuda;
