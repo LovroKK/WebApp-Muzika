@@ -5,12 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-////////////////////////////////////////////////////////////////////////////
-//  
-// !!VAZNO JOS PROVJERITI!!
-//
-////////////////////////////////////////////////////////////////////////////
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,7 +25,12 @@ public class RegisterBusinessRequest {
     @Size(min = 6, message = "Lozinka mora imati barem 6 znakova")
     private String lozinka;
 
+    @NotBlank(message = "Lokacija je obavezna")
     private String lokacija;
+
+    @NotBlank(message = "Opis je obavezan")
     private String opis;
+
+    @NotBlank(message = "Broj telefona je obavezan")
     private String brojTelefona;
 }
