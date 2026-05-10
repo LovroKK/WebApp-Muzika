@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Kluba - BeatSync Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/navbar.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <beat-sync-navbar></beat-sync-navbar>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-gray-800 rounded-lg p-8">
+            <h1 class="text-3xl font-bold mb-6 text-center">Profil Kluba</h1>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Lijeva kolona -->
+                <div class="md:col-span-1">
+                    <div class="bg-gray-700 rounded-lg p-6 text-center">
+                        <img id="avatarImg" src="https://ui-avatars.com/api/?background=7c3aed&color=fff&size=128" alt="Logo" class="w-32 h-32 rounded-full mx-auto mb-4">
+                        <h2 id="displayNaziv" class="text-xl font-semibold mb-2">—</h2>
+                        <p id="displayUsername" class="text-gray-400 mb-2">—</p>
+                        <p id="displayLokacija" class="text-gray-400 text-sm mb-4">—</p>
+                        <button id="urediBtn" onclick="openEditModal()" class="hidden w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium text-sm">
+                            Uredi Profil
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Desna kolona -->
+                <div class="md:col-span-2 space-y-6">
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">Kontakt</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-400">Email:</span><span id="displayEmail">—</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Telefon:</span><span id="displayTelefon">—</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Lokacija:</span>
+                                <a id="displayLokacijaLink" href="#" target="_blank" class="text-purple-400">—</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">O klubu</h3>
+                        <p id="displayOpis" class="text-sm text-gray-300">—</p>
+                    </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">Resident DJ</h3>
+                        <p id="displayResidentDj" class="text-sm text-gray-300">—</p>
+                    </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">Top suradnici</h3>
+                        <p id="displayNajbolji" class="text-sm text-gray-300">—</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-8 w-full max-w-2xl max-h-screen overflow-y-auto mx-4">
+            <h2 class="text-2xl font-bold mb-6">Uredi Profil Kluba</h2>
+
+            <form id="editForm" class="space-y-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Naziv kluba</label>
+                        <input type="text" id="editNaziv" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Email</label>
+                        <input type="email" id="editEmail" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Broj telefona</label>
+                        <input type="tel" id="editTelefon" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Lokacija (link na Google Maps)</label>
+                        <input type="text" id="editLokacija" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Opis</label>
+                        <textarea id="editOpis" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Resident DJ (korisničko ime)</label>
+                        <input type="text" id="editResidentDj" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Top suradnici (5 najboljih DJ-eva)</label>
+                        <textarea id="editNajbolji" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" placeholder="Navedite 5 najboljih DJ-eva koji su nastupali u vašem klubu"></textarea>
+                    </div>
+                </div>
+
+                <p id="editErrorMsg" class="hidden text-red-400 text-sm text-center"></p>
+
+                <div class="flex gap-4 pt-2">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-600 hover:bg-gray-500 py-2 rounded-lg font-medium">
+                        Odustani
+                    </button>
+                    <button type="submit" id="editSubmitBtn" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium">
+                        Spremi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        const token = localStorage.getItem('token');
+
+        async function ucitajProfil() {
+            if (!token) return;
+
+            try {
+                const response = await fetch('http://localhost:8080/api/business/profil', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) throw new Error();
+
+                const p = await response.json();
+
+                document.getElementById('displayNaziv').textContent = p.nazivKluba || '—';
+                document.getElementById('displayUsername').textContent = '@' + p.usernameBusiness;
+                document.getElementById('displayEmail').textContent = p.email || '—';
+                document.getElementById('displayTelefon').textContent = p.brojTelefona || '—';
+                document.getElementById('displayOpis').textContent = p.opis || '—';
+                document.getElementById('displayResidentDj').textContent = p.residentDjUsername || '—';
+                document.getElementById('displayNajbolji').textContent = p.najboljiIzvodaci || '—';
+
+                const lokEl = document.getElementById('displayLokacija');
+                const lokLinkEl = document.getElementById('displayLokacijaLink');
+                if (p.lokacija) {
+                    lokEl.textContent = p.lokacija;
+                    lokLinkEl.textContent = p.lokacija;
+                    lokLinkEl.href = p.lokacija.startsWith('http') ? p.lokacija : 'https://maps.google.com/?q=' + encodeURIComponent(p.lokacija);
+                }
+
+                if (p.logoAvatar) {
+                    document.getElementById('avatarImg').src = p.logoAvatar;
+                } else {
+                    document.getElementById('avatarImg').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nazivKluba) + '&background=7c3aed&color=fff&size=128';
+                }
+
+                document.getElementById('urediBtn').classList.remove('hidden');
+                window._profil = p;
+            } catch {
+                // token nije valjan ili je istekao — gumb ostaje sakriven
+            }
+        }
+
+        function openEditModal() {
+            const p = window._profil;
+            if (!p) return;
+
+            document.getElementById('editNaziv').value = p.nazivKluba || '';
+            document.getElementById('editEmail').value = p.email || '';
+            document.getElementById('editTelefon').value = p.brojTelefona || '';
+            document.getElementById('editLokacija').value = p.lokacija || '';
+            document.getElementById('editOpis').value = p.opis || '';
+            document.getElementById('editResidentDj').value = p.residentDjUsername || '';
+            document.getElementById('editNajbolji').value = p.najboljiIzvodaci || '';
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editErrorMsg').classList.add('hidden');
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const errorMsg = document.getElementById('editErrorMsg');
+            const submitBtn = document.getElementById('editSubmitBtn');
+
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Spremanje...';
+
+            const payload = {
+                nazivKluba: document.getElementById('editNaziv').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                brojTelefona: document.getElementById('editTelefon').value.trim(),
+                lokacija: document.getElementById('editLokacija').value.trim(),
+                opis: document.getElementById('editOpis').value.trim(),
+                residentDjUsername: document.getElementById('editResidentDj').value.trim() || null,
+                najboljiIzvodaci: document.getElementById('editNajbolji').value.trim() || null
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/business/profil', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Greška pri spremanju');
+                }
+
+                window._profil = data;
+                closeEditModal();
+                ucitajProfil();
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Spremi';
+            }
+        });
+
+        ucitajProfil();
+    </script>
+</body>
+</html>
