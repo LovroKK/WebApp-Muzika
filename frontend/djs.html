@@ -29,141 +29,29 @@
             <section class="mb-10">
                 <div class="max-w-xl mx-auto mb-6 relative">
                     <i data-feather="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
-                    <input type="text" id="dj-search" placeholder="Pretraži DJ-eve po imenu, stilu ili opisu..." 
+                    <input type="text" id="dj-search" placeholder="Pretraži DJ-eve po imenu, stilu ili opisu..."
                         class="w-full bg-gray-800 border border-gray-700 rounded-full py-3 pl-12 pr-4 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition">
                 </div>
-                <div class="flex flex-wrap gap-3 justify-center" id="city-filters">
-                    <button class="filter-btn bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-full text-sm font-medium transition" data-city="all">Svi</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-city="Zagreb">Zagreb</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-city="Split">Split</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-city="Rijeka">Rijeka</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-city="Osijek">Osijek</button>
-                    <button class="filter-btn bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-medium transition" data-city="Dubrovnik">Dubrovnik</button>
+                <div class="flex flex-wrap gap-3 justify-center items-center">
+                    <span class="text-gray-400 text-sm">Cijena:</span>
+                    <input type="number" id="minCijena" placeholder="Min €" min="0"
+                        class="w-24 bg-gray-800 border border-gray-700 rounded-full py-2 px-4 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500">
+                    <span class="text-gray-400 text-sm">—</span>
+                    <input type="number" id="maxCijena" placeholder="Max €" min="0"
+                        class="w-24 bg-gray-800 border border-gray-700 rounded-full py-2 px-4 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500">
+                    <button onclick="pretrazi()" class="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-full text-sm font-medium transition">
+                        Pretraži
+                    </button>
+                    <button onclick="resetFilters()" class="bg-gray-700 hover:bg-gray-600 px-5 py-2 rounded-full text-sm font-medium transition">
+                        Reset
+                    </button>
                 </div>
             </section>
 
             <!-- DJ Grid -->
             <section class="mb-16">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- DJ Card 1 -->
-                    <div class="dj-card bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700" data-city="Zagreb" data-search="DJ Electro EDM House Zagreb festivali">
-                        <div class="flex items-center mb-4">
-                            <img src="http://static.photos/people/200x200/11" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
-                            <div>
-                                <h3 class="text-xl font-semibold">DJ Electro</h3>
-                                <p class="text-gray-400">Zagreb</p>
-                            </div>
-                        </div>
-                        <p class="mb-4 text-gray-300">Specijaliziran za EDM i House glazbu s 5+ godina iskustva na velikim festivalima.</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">EDM</span>
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">House</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-purple-400 font-medium">150€/sat</span>
-                            <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition">Rezerviraj</button>
-                        </div>
-                    </div>
-
-                    <!-- DJ Card 2 -->
-                    <div class="dj-card bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700" data-city="Split" data-search="DJ Bass King Hip-Hop RnB Split klubovi Jadran">
-                        <div class="flex items-center mb-4">
-                            <img src="http://static.photos/people/200x200/12" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
-                            <div>
-                                <h3 class="text-xl font-semibold">DJ Bass King</h3>
-                                <p class="text-gray-400">Split</p>
-                            </div>
-                        </div>
-                        <p class="mb-4 text-gray-300">Hip-Hop i RnB specijalist s dugogodišnjim iskustvom u klubovima uz Jadran.</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Hip-Hop</span>
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">RnB</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-purple-400 font-medium">130€/sat</span>
-                            <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition">Rezerviraj</button>
-                        </div>
-                    </div>
-
-                    <!-- DJ Card 3 -->
-                    <div class="dj-card bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700" data-city="Rijeka" data-search="DJ Luna Techno underground Rijeka festivali elektronska">
-                        <div class="flex items-center mb-4">
-                            <img src="http://static.photos/people/200x200/13" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
-                            <div>
-                                <h3 class="text-xl font-semibold">DJ Luna</h3>
-                                <p class="text-gray-400">Rijeka</p>
-                            </div>
-                        </div>
-                        <p class="mb-4 text-gray-300">Techno i underground scena. Redovni gost na festivalima elektronske glazbe.</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Techno</span>
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Underground</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-purple-400 font-medium">140€/sat</span>
-                            <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition">Rezerviraj</button>
-                        </div>
-                    </div>
-
-                    <!-- DJ Card 4 -->
-                    <div class="dj-card bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700" data-city="Osijek" data-search="DJ Flash Pop Komercijalno Osijek svadbe rođendani korporativni">
-                        <div class="flex items-center mb-4">
-                            <img src="http://static.photos/people/200x200/14" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
-                            <div>
-                                <h3 class="text-xl font-semibold">DJ Flash</h3>
-                                <p class="text-gray-400">Osijek</p>
-                            </div>
-                        </div>
-                        <p class="mb-4 text-gray-300">Komercijalni DJ za svadbe, rođendane i korporativne događaje. 10+ godina iskustva.</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Pop</span>
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Komercijalno</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-purple-400 font-medium">120€/sat</span>
-                            <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition">Rezerviraj</button>
-                        </div>
-                    </div>
-
-                    <!-- DJ Card 5 -->
-                    <div class="dj-card bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700" data-city="Zagreb" data-search="DJ Deep Deep House Progressive Zagreb lounge barovi upscale">
-                        <div class="flex items-center mb-4">
-                            <img src="http://static.photos/people/200x200/15" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
-                            <div>
-                                <h3 class="text-xl font-semibold">DJ Deep</h3>
-                                <p class="text-gray-400">Zagreb</p>
-                            </div>
-                        </div>
-                        <p class="mb-4 text-gray-300">Deep House i Progressive. Stvara jedinstvenu atmosferu za upscale događaje i lounge barove.</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Deep House</span>
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Progressive</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-purple-400 font-medium">160€/sat</span>
-                            <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition">Rezerviraj</button>
-                        </div>
-                    </div>
-
-                    <!-- DJ Card 6 -->
-                    <div class="dj-card bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700" data-city="Dubrovnik" data-search="DJ Vibe Lounge Chill-out Dubrovnik hoteli plaža sunset">
-                        <div class="flex items-center mb-4">
-                            <img src="http://static.photos/people/200x200/16" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
-                            <div>
-                                <h3 class="text-xl font-semibold">DJ Vibe</h3>
-                                <p class="text-gray-400">Dubrovnik</p>
-                            </div>
-                        </div>
-                        <p class="mb-4 text-gray-300">Lounge, Chill-out i Sunset session specijalist. Idealna za hotele i plažne barove.</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Lounge</span>
-                            <span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm">Chill-out</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-purple-400 font-medium">110€/sat</span>
-                            <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition">Rezerviraj</button>
-                        </div>
-                    </div>
+                <div id="djGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <p id="loadingMsg" class="col-span-3 text-center text-gray-400">Učitavanje...</p>
                 </div>
             </section>
         </div>
@@ -219,45 +107,69 @@
     <script>
         feather.replace();
 
-        // Filter and Search logic
-        const djCards = document.querySelectorAll('.dj-card');
-        const filterBtns = document.querySelectorAll('#city-filters .filter-btn');
-        const searchInput = document.getElementById('dj-search');
+        async function pretrazi() {
+            const search = document.getElementById('dj-search').value.trim();
+            const minCijena = document.getElementById('minCijena').value;
+            const maxCijena = document.getElementById('maxCijena').value;
 
-        function filterDJs() {
-            const activeBtn = document.querySelector('#city-filters .filter-btn.bg-purple-600');
-            const selectedCity = activeBtn ? activeBtn.dataset.city : 'all';
-            const query = searchInput.value.toLowerCase().trim();
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (minCijena) params.append('minCijena', minCijena);
+            if (maxCijena) params.append('maxCijena', maxCijena);
 
-            djCards.forEach(card => {
-                const city = card.dataset.city;
-                const searchData = card.dataset.search.toLowerCase();
-                const matchesCity = selectedCity === 'all' || city === selectedCity;
-                const matchesSearch = !query || searchData.includes(query);
-                
-                if (matchesCity && matchesSearch) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
+            const grid = document.getElementById('djGrid');
+            grid.innerHTML = '<p class="col-span-3 text-center text-gray-400">Učitavanje...</p>';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/djs?' + params.toString());
+                const djs = await response.json();
+
+                if (djs.length === 0) {
+                    grid.innerHTML = '<p class="col-span-3 text-center text-gray-400">Nema rezultata za zadane filtere.</p>';
+                    return;
                 }
-            });
+
+                grid.innerHTML = djs.map(dj => {
+                    const avatar = dj.logoAvatar ||
+                        'https://ui-avatars.com/api/?name=' + encodeURIComponent((dj.ime || '') + '+' + (dj.prezime || '')) + '&background=7c3aed&color=fff&size=128';
+                    const cijena = dj.cijenaPoSatu ? dj.cijenaPoSatu + '€/sat' : 'Po dogovoru';
+                    const iskustvo = dj.ukupnoGodinaIskustva ? dj.ukupnoGodinaIskustva + ' god. iskustva' : '';
+                    const opis = dj.kratkiOpis || '';
+
+                    return `
+                        <div class="bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700">
+                            <div class="flex items-center mb-4">
+                                <img src="${avatar}" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
+                                <div>
+                                    <h3 class="text-xl font-semibold">${dj.ime} ${dj.prezime}</h3>
+                                    <p class="text-gray-400 text-sm">@${dj.usernameIzvodac}</p>
+                                </div>
+                            </div>
+                            <p class="mb-4 text-gray-300 text-sm line-clamp-3">${opis}</p>
+                            ${iskustvo ? `<span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm mb-4 inline-block">${iskustvo}</span>` : ''}
+                            <div class="flex justify-between items-center mt-4">
+                                <span class="text-purple-400 font-medium">${cijena}</span>
+                                ${dj.linkMixtape ? `<a href="${dj.linkMixtape}" target="_blank" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition text-sm">Mixtape</a>` : ''}
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch {
+                grid.innerHTML = '<p class="col-span-3 text-center text-red-400">Greška pri učitavanju DJ-eva.</p>';
+            }
         }
 
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Reset styles
-                filterBtns.forEach(b => {
-                    b.classList.remove('bg-purple-600', 'hover:bg-purple-700');
-                    b.classList.add('bg-gray-800', 'hover:bg-gray-700');
-                });
-                // Set active
-                btn.classList.remove('bg-gray-800', 'hover:bg-gray-700');
-                btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-                filterDJs();
-            });
+        function resetFilters() {
+            document.getElementById('dj-search').value = '';
+            document.getElementById('minCijena').value = '';
+            document.getElementById('maxCijena').value = '';
+            pretrazi();
+        }
+
+        document.getElementById('dj-search').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') pretrazi();
         });
 
-        searchInput.addEventListener('input', filterDJs);
+        pretrazi();
     </script>
 </body>
 </html>
