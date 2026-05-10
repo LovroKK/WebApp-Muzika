@@ -15,61 +15,67 @@
     <main class="container mx-auto px-4 py-8 max-w-2xl">
         <div class="bg-gray-800 rounded-lg p-8">
             <h1 class="text-3xl font-bold mb-6 text-center">Registracija Kluba</h1>
-            
-            <form class="space-y-6">
+
+            <form id="registerBusinessForm" class="space-y-6">
                 <div class="grid md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="usernameBusiness" class="block text-sm font-medium mb-2">Korisničko ime</label>
+                        <input type="text" id="usernameBusiness" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                    </div>
+
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Logo/Avatar</label>
                         <input type="file" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label for="businessName" class="block text-sm font-medium mb-2">Naziv kluba</label>
                         <input type="text" id="businessName" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label for="location" class="block text-sm font-medium mb-2">Lokacija</label>
                         <input type="text" id="location" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label for="description" class="block text-sm font-medium mb-2">Opis</label>
                         <textarea id="description" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required></textarea>
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Slike prostora</label>
                         <input type="file" multiple class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label for="residentDJ" class="block text-sm font-medium mb-2">Resident DJ</label>
                         <input type="text" id="residentDJ" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Tko je ovdje radio (5 najboljih):</label>
                         <textarea placeholder="Navedite 5 najboljih DJ-eva koji su nastupali u vašem klubu" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></textarea>
                     </div>
-                    
+
                     <div>
                         <label for="businessEmail" class="block text-sm font-medium mb-2">Email</label>
                         <input type="email" id="businessEmail" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div>
                         <label for="businessPhone" class="block text-sm font-medium mb-2">Broj telefona</label>
                         <input type="tel" id="businessPhone" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label for="businessPassword" class="block text-sm font-medium mb-2">Lozinka</label>
                         <input type="password" id="businessPassword" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div class="md:col-span-2">
-                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium">
+                        <p id="errorMsg" class="hidden text-red-400 text-sm text-center mb-2"></p>
+                        <button type="submit" id="submitBtn" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium">
                             Registriraj se
                         </button>
                     </div>
@@ -80,6 +86,53 @@
 
     <script>
         feather.replace();
+
+        document.getElementById('registerBusinessForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const errorMsg = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('submitBtn');
+
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registracija...';
+
+            const payload = {
+                usernameBusiness: document.getElementById('usernameBusiness').value.trim(),
+                nazivKluba: document.getElementById('businessName').value.trim(),
+                email: document.getElementById('businessEmail').value.trim(),
+                lozinka: document.getElementById('businessPassword').value,
+                lokacija: document.getElementById('location').value.trim() || null,
+                opis: document.getElementById('description').value.trim() || null,
+                brojTelefona: document.getElementById('businessPhone').value.trim() || null
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/register/business', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Greška pri registraciji');
+                }
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role);
+                localStorage.setItem('user_logged_in', 'true');
+
+                window.location.href = 'index.html';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Registriraj se';
+            }
+        });
     </script>
 </body>
 </html>
