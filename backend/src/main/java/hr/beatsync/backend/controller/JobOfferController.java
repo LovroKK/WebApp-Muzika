@@ -1,0 +1,152 @@
+package hr.beatsync.backend.controller;
+
+import hr.beatsync.backend.dto.CreateJobOfferRequest;
+import hr.beatsync.backend.dto.JobOfferResponse;
+import hr.beatsync.backend.enums.StatusRezervacije;
+import hr.beatsync.backend.model.BusinessKorisnik;
+import hr.beatsync.backend.model.IzvodacKorisnik;
+import hr.beatsync.backend.model.JobOffer;
+import hr.beatsync.backend.model.Rezervacija;
+import hr.beatsync.backend.repository.BusinessKorisnikRepository;
+import hr.beatsync.backend.repository.IzvodacKorisnikRepository;
+import hr.beatsync.backend.repository.JobOfferRepository;
+import hr.beatsync.backend.repository.RezervacijaRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/job-offers")
+public class JobOfferController {
+
+    private final JobOfferRepository jobOfferRepo;
+    private final BusinessKorisnikRepository businessRepo;
+    private final IzvodacKorisnikRepository izvodacRepo;
+    private final RezervacijaRepository rezervacijaRepo;
+
+    public JobOfferController(JobOfferRepository jobOfferRepo,
+                              BusinessKorisnikRepository businessRepo,
+                              IzvodacKorisnikRepository izvodacRepo,
+                              RezervacijaRepository rezervacijaRepo) {
+        this.jobOfferRepo = jobOfferRepo;
+        this.businessRepo = businessRepo;
+        this.izvodacRepo = izvodacRepo;
+        this.rezervacijaRepo = rezervacijaRepo;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody CreateJobOfferRequest req) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isBusiness = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_BUSINESS"));
+        if (!isBusiness) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Samo business korisnici mogu objaviti ponudu"));
+        }
+
+        String username = auth.getName();
+        BusinessKorisnik business = businessRepo.findById(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Business korisnik nije pronađen"));
+
+        JobOffer offer = JobOffer.builder()
+                .nazivPonude(req.getNazivPonude())
+                .datum(req.getDatum())
+                .pocetak(req.getPocetak())
+                .kraj(req.getKraj())
+                .lokacija(req.getLokacija())
+                .budzet(req.getBudzet())
+                .opisPosla(req.getOpisPosla())
+                .potrebnoIskustvo(req.getPotrebnoIskustvo())
+                .businessPonuda(business)
+                .build();
+
+        jobOfferRepo.save(offer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(offer, false));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<JobOfferResponse>> list() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        boolean isBusiness = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_BUSINESS"));
+
+        if (isBusiness) {
+            List<JobOfferResponse> offers = jobOfferRepo.findByBusinessPonuda_UsernameBusiness(username)
+                    .stream()
+                    .map(o -> toResponse(o, false))
+                    .toList();
+            return ResponseEntity.ok(offers);
+        } else {
+            List<JobOfferResponse> offers = jobOfferRepo.findAll()
+                    .stream()
+                    .map(o -> toResponse(o, rezervacijaRepo
+                            .existsByJobOffer_IdPonudeAndIzvodacRezervacija_UsernameIzvodac(o.getIdPonude(), username)))
+                    .toList();
+            return ResponseEntity.ok(offers);
+        }
+    }
+
+    @PostMapping("/{id}/prijava")
+    public ResponseEntity<?> prijava(@PathVariable Integer id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isIzvodac = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_IZVODAC"));
+        if (!isIzvodac) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Samo izvođači se mogu prijaviti na ponudu"));
+        }
+
+        String username = auth.getName();
+        JobOffer offer = jobOfferRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ponuda ne postoji"));
+
+        if (rezervacijaRepo.existsByJobOffer_IdPonudeAndIzvodacRezervacija_UsernameIzvodac(id, username)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Već ste prijavljeni na ovu ponudu");
+        }
+
+        IzvodacKorisnik izvodac = izvodacRepo.findById(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Izvođač nije pronađen"));
+
+        LocalDateTime periodOd = offer.getDatum().atTime(offer.getPocetak());
+        LocalDateTime periodDo = offer.getDatum().atTime(offer.getKraj());
+        if (periodDo.isBefore(periodOd)) {
+            periodDo = periodDo.plusDays(1);
+        }
+
+        Rezervacija rez = Rezervacija.builder()
+                .jobOffer(offer)
+                .periodOd(periodOd)
+                .periodDo(periodDo)
+                .statusRezervacije(StatusRezervacije.REQUESTED)
+                .potvrdaRezervacije(false)
+                .izvodacRezervacija(izvodac)
+                .businessRezervacija(offer.getBusinessPonuda())
+                .build();
+
+        rezervacijaRepo.save(rez);
+        return ResponseEntity.ok(Map.of("poruka", "Uspješno ste se prijavili na ponudu"));
+    }
+
+    private JobOfferResponse toResponse(JobOffer o, boolean jeliPrijavljen) {
+        return new JobOfferResponse(
+                o.getIdPonude(),
+                o.getNazivPonude(),
+                o.getDatum(),
+                o.getPocetak(),
+                o.getKraj(),
+                o.getLokacija(),
+                o.getBudzet(),
+                o.getOpisPosla(),
+                o.getPotrebnoIskustvo(),
+                o.getBusinessPonuda().getUsernameBusiness(),
+                o.getBusinessPonuda().getNazivKluba(),
+                jeliPrijavljen
+        );
+    }
+}
