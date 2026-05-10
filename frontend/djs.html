@@ -107,7 +107,43 @@
     <script>
         feather.replace();
 
+        const token = localStorage.getItem('token');
+        let mojiFavoriti = new Set();
+
+        async function ucitajFavorite() {
+            if (!token) return;
+            try {
+                const res = await fetch('http://localhost:8080/api/favoriti', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const lista = await res.json();
+                mojiFavoriti = new Set(lista.filter(f => f.tipFavorita === 'IZVODAC').map(f => f.favoritUsername));
+            } catch {}
+        }
+
+        async function toggleFavorit(username, btn) {
+            if (!token) return;
+            try {
+                const res = await fetch(`http://localhost:8080/api/favoriti/toggle?tipFavorita=IZVODAC&favoritUsername=${username}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (data.favorit) {
+                    mojiFavoriti.add(username);
+                    btn.innerHTML = '❤️';
+                    btn.title = 'Ukloni iz favorita';
+                } else {
+                    mojiFavoriti.delete(username);
+                    btn.innerHTML = '🤍';
+                    btn.title = 'Dodaj u favorite';
+                }
+            } catch {}
+        }
+
         async function pretrazi() {
+            await ucitajFavorite();
+
             const search = document.getElementById('dj-search').value.trim();
             const minCijena = document.getElementById('minCijena').value;
             const maxCijena = document.getElementById('maxCijena').value;
@@ -122,12 +158,19 @@
 
             try {
                 const response = await fetch('http://localhost:8080/api/djs?' + params.toString());
-                const djs = await response.json();
+                let djs = await response.json();
 
                 if (djs.length === 0) {
                     grid.innerHTML = '<p class="col-span-3 text-center text-gray-400">Nema rezultata za zadane filtere.</p>';
                     return;
                 }
+
+                // Favoriti na vrh
+                djs.sort((a, b) => {
+                    const aFav = mojiFavoriti.has(a.usernameIzvodac) ? 0 : 1;
+                    const bFav = mojiFavoriti.has(b.usernameIzvodac) ? 0 : 1;
+                    return aFav - bFav;
+                });
 
                 grid.innerHTML = djs.map(dj => {
                     const avatar = dj.logoAvatar ||
@@ -135,15 +178,20 @@
                     const cijena = dj.cijenaPoSatu ? dj.cijenaPoSatu + '€/sat' : 'Po dogovoru';
                     const iskustvo = dj.ukupnoGodinaIskustva ? dj.ukupnoGodinaIskustva + ' god. iskustva' : '';
                     const opis = dj.kratkiOpis || '';
+                    const isFav = mojiFavoriti.has(dj.usernameIzvodac);
+                    const favBtn = token ? `<button onclick="toggleFavorit('${dj.usernameIzvodac}', this)" title="${isFav ? 'Ukloni iz favorita' : 'Dodaj u favorite'}" class="text-xl leading-none">${isFav ? '❤️' : '🤍'}</button>` : '';
 
                     return `
-                        <div class="bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700">
-                            <div class="flex items-center mb-4">
-                                <img src="${avatar}" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
-                                <div>
-                                    <h3 class="text-xl font-semibold">${dj.ime} ${dj.prezime}</h3>
-                                    <p class="text-gray-400 text-sm">@${dj.usernameIzvodac}</p>
+                        <div class="bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow border border-gray-700 ${isFav ? 'border-purple-500' : ''}">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <img src="${avatar}" alt="DJ" class="w-16 h-16 rounded-full mr-4 object-cover">
+                                    <div>
+                                        <h3 class="text-xl font-semibold">${dj.ime} ${dj.prezime}</h3>
+                                        <p class="text-gray-400 text-sm">@${dj.usernameIzvodac}</p>
+                                    </div>
                                 </div>
+                                ${favBtn}
                             </div>
                             <p class="mb-4 text-gray-300 text-sm line-clamp-3">${opis}</p>
                             ${iskustvo ? `<span class="bg-purple-900/50 text-purple-300 px-2 py-1 rounded text-sm mb-4 inline-block">${iskustvo}</span>` : ''}
