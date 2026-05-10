@@ -15,129 +15,238 @@
     <main class="container mx-auto px-4 py-8 max-w-4xl">
         <div class="bg-gray-800 rounded-lg p-8">
             <h1 class="text-3xl font-bold mb-6 text-center">Moj Profil</h1>
-            
+
             <div class="grid md:grid-cols-3 gap-8">
-                <!-- Profile Info -->
+                <!-- Lijeva kolona -->
                 <div class="md:col-span-1">
                     <div class="bg-gray-700 rounded-lg p-6 text-center">
-                        <img src="http://static.photos/people/200x200/1" alt="Profile" class="w-32 h-32 rounded-full mx-auto mb-4">
-                        <h2 class="text-xl font-semibold mb-2">DJ Electro</h2>
-                        <p class="text-gray-400 mb-4">Zagreb, Hrvatska</p>
-                        <div class="flex justify-center space-x-4 mb-4">
-                            <a href="#"><i data-feather="instagram" class="w-5 h-5"></i></a>
-                            <a href="#"><i data-feather="facebook" class="w-5 h-5"></i></a>
-                        </div>
-                        <button class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium text-sm">
-                                Uredi Profil
-                            </button>
+                        <img id="avatarImg" src="https://ui-avatars.com/api/?background=7c3aed&color=fff&size=128" alt="Avatar" class="w-32 h-32 rounded-full mx-auto mb-4">
+                        <h2 id="displayIme" class="text-xl font-semibold mb-2">—</h2>
+                        <p id="displayUsername" class="text-gray-400 mb-4">—</p>
+                        <button id="urediBtn" onclick="openEditModal()" class="hidden w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium text-sm">
+                            Uredi Profil
+                        </button>
                     </div>
                 </div>
-                
-                <!-- Profile Details -->
-                <div class="md:col-span-2">
-                    <div class="grid md:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-gray-700 rounded-lg p-4">
-                            <h3 class="font-semibold mb-3">Osnovne informacije</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between">
-                                <span>Član od:</span>
-                                <span>15.10.2023.</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Ukupno rezervacija:</span>
-                                <span>12</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Ocjena:</span>
-                                <span class="text-yellow-400">4.8/5</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Status:</span>
-                                <span class="text-green-400">Aktivan</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-700 rounded-lg p-4">
-                        <h3 class="font-semibold mb-3">Statistika</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between">
-                                <span>Ukupno zarada:</span>
-                                <span class="text-green-400">1,850€</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Prosječna cijena:</span>
-                                <span>150€/sat</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Ukupno sati:</span>
-                                <span>74</span>
-                            </div>
-                        </div>
-                    </div>
-                    
+
+                <!-- Desna kolona -->
+                <div class="md:col-span-2 space-y-6">
                     <div class="bg-gray-700 rounded-lg p-4">
                         <h3 class="font-semibold mb-3">Korisnički podatci</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between">
-                                <span>Email:</span>
-                                <span>djelectro@email.com</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Telefon:</span>
-                                <span>+385 91 234 5678</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Vrsta profila:</span>
-                                <span>DJ</span>
-                            </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-400">Email:</span><span id="displayEmail">—</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Telefon:</span><span id="displayTelefon">—</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Mixtape:</span><a id="displayMixtape" href="#" target="_blank" class="text-purple-400 truncate max-w-xs">—</a></div>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- Recent Activity -->
-            <div class="mt-8">
-                <h2 class="text-2xl font-semibold mb-6">Nedavna Aktivnost</h2>
-                
-                <div class="space-y-4">
+
                     <div class="bg-gray-700 rounded-lg p-4">
-                    <h3 class="font-semibold mb-3">Nedavne Rezervacije</h3>
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span>Club Electro - 10.12.2023.</span>
-                            <span class="text-green-400">+300€</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span>Wedding Party - 05.12.2023.</span>
-                            <span class="text-green-400">+450€</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span>Corporate Event - 01.12.2023.</span>
-                            <span class="text-green-400">+600€</span>
+                        <h3 class="font-semibold mb-3">Iskustvo</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-400">DJ od:</span><span id="displayRadiOd">—</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Godine iskustva:</span><span id="displayGodine">—</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Cijena/sat:</span><span id="displayCijena">—</span></div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="bg-gray-700 rounded-lg p-4">
-                    <h3 class="font-semibold mb-3">Notifikacije</h3>
-                    <div class="space-y-2">
-                        <div class="flex items-center">
-                            <i data-feather="bell" class="w-4 h-4 mr-2 text-purple-400"></i>
-                            <span>Nova ponuda posla: Club Summer Night</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i data-feather="mail" class="w-4 h-4 mr-2 text-purple-400"></i>
-                            <span>Poruka od Club Electro</span>
-                        </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">O meni</h3>
+                        <p id="displayOpis" class="text-sm text-gray-300">—</p>
+                    </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">Prijašnji poslovi</h3>
+                        <p id="displayPoslovi" class="text-sm text-gray-300">—</p>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-8 w-full max-w-2xl max-h-screen overflow-y-auto mx-4">
+            <h2 class="text-2xl font-bold mb-6">Uredi Profil</h2>
+
+            <form id="editForm" class="space-y-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Ime</label>
+                        <input type="text" id="editIme" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Prezime</label>
+                        <input type="text" id="editPrezime" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Email</label>
+                        <input type="email" id="editEmail" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Broj telefona</label>
+                        <input type="tel" id="editTelefon" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Link na mixtape</label>
+                        <input type="url" id="editMixtape" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Cijena po satu (€)</label>
+                        <input type="number" id="editCijena" min="0" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">DJ od (godina)</label>
+                        <input type="number" id="editRadiOd" min="1900" max="2100" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Godine iskustva</label>
+                        <input type="number" id="editGodine" min="0" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Kratki opis</label>
+                        <textarea id="editOpis" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-1">Prijašnji poslovi</label>
+                        <textarea id="editPoslovi" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500" required></textarea>
+                    </div>
+                </div>
+
+                <p id="editErrorMsg" class="hidden text-red-400 text-sm text-center"></p>
+
+                <div class="flex gap-4 pt-2">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-600 hover:bg-gray-500 py-2 rounded-lg font-medium">
+                        Odustani
+                    </button>
+                    <button type="submit" id="editSubmitBtn" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium">
+                        Spremi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         feather.replace();
+
+        const token = localStorage.getItem('token');
+
+        async function ucitajProfil() {
+            if (!token) return;
+
+            try {
+                const response = await fetch('http://localhost:8080/api/izvodac/profil', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) throw new Error();
+
+                const p = await response.json();
+
+                document.getElementById('displayIme').textContent = p.ime + ' ' + p.prezime;
+                document.getElementById('displayUsername').textContent = '@' + p.usernameIzvodac;
+                document.getElementById('displayEmail').textContent = p.email || '—';
+                document.getElementById('displayTelefon').textContent = p.brojTelefona || '—';
+                document.getElementById('displayOpis').textContent = p.kratkiOpis || '—';
+                document.getElementById('displayPoslovi').textContent = p.prijasnjiPoslovi || '—';
+                document.getElementById('displayRadiOd').textContent = p.radiOd || '—';
+                document.getElementById('displayGodine').textContent = p.ukupnoGodinaIskustva ? p.ukupnoGodinaIskustva + ' god.' : '—';
+                document.getElementById('displayCijena').textContent = p.cijenaPoSatu ? p.cijenaPoSatu + ' €/sat' : '—';
+
+                const mixtapeEl = document.getElementById('displayMixtape');
+                if (p.linkMixtape) {
+                    mixtapeEl.href = p.linkMixtape;
+                    mixtapeEl.textContent = p.linkMixtape;
+                }
+
+                if (p.logoAvatar) {
+                    document.getElementById('avatarImg').src = p.logoAvatar;
+                } else {
+                    document.getElementById('avatarImg').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.ime + '+' + p.prezime) + '&background=7c3aed&color=fff&size=128';
+                }
+
+                document.getElementById('urediBtn').classList.remove('hidden');
+                window._profil = p;
+            } catch {
+                // token nije valjan ili je istekao — gumb ostaje sakriven
+            }
+        }
+
+        function openEditModal() {
+            const p = window._profil;
+            if (!p) return;
+
+            document.getElementById('editIme').value = p.ime || '';
+            document.getElementById('editPrezime').value = p.prezime || '';
+            document.getElementById('editEmail').value = p.email || '';
+            document.getElementById('editTelefon').value = p.brojTelefona || '';
+            document.getElementById('editMixtape').value = p.linkMixtape || '';
+            document.getElementById('editCijena').value = p.cijenaPoSatu || '';
+            document.getElementById('editRadiOd').value = p.radiOd || '';
+            document.getElementById('editGodine').value = p.ukupnoGodinaIskustva || '';
+            document.getElementById('editOpis').value = p.kratkiOpis || '';
+            document.getElementById('editPoslovi').value = p.prijasnjiPoslovi || '';
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editErrorMsg').classList.add('hidden');
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const errorMsg = document.getElementById('editErrorMsg');
+            const submitBtn = document.getElementById('editSubmitBtn');
+
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Spremanje...';
+
+            const payload = {
+                ime: document.getElementById('editIme').value.trim(),
+                prezime: document.getElementById('editPrezime').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                brojTelefona: document.getElementById('editTelefon').value.trim(),
+                linkMixtape: document.getElementById('editMixtape').value.trim(),
+                cijenaPoSatu: parseFloat(document.getElementById('editCijena').value),
+                kratkiOpis: document.getElementById('editOpis').value.trim(),
+                prijasnjiPoslovi: document.getElementById('editPoslovi').value.trim(),
+                radiOd: parseInt(document.getElementById('editRadiOd').value),
+                ukupnoGodinaIskustva: parseInt(document.getElementById('editGodine').value)
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/izvodac/profil', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Greška pri spremanju');
+                }
+
+                window._profil = data;
+                closeEditModal();
+                ucitajProfil();
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Spremi';
+            }
+        });
+
+        ucitajProfil();
     </script>
 </body>
 </html>
