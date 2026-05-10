@@ -15,54 +15,59 @@
     <main class="container mx-auto px-4 py-8 max-w-2xl">
         <div class="bg-gray-800 rounded-lg p-8">
             <h1 class="text-3xl font-bold mb-6 text-center">Registracija DJ Profila</h1>
-            
-            <form class="space-y-6">
+
+            <form id="registerDjForm" class="space-y-6">
                 <div class="grid md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="usernameIzvodac" class="block text-sm font-medium mb-2">Korisničko ime</label>
+                        <input type="text" id="usernameIzvodac" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                    </div>
+
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Avatar</label>
                         <input type="file" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
-                    
+
                     <div>
-                        <label for="firstName" class="block text-sm font-medium mb-2">Ime</label>
-                        <input type="text" id="firstName" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                        <label for="ime" class="block text-sm font-medium mb-2">Ime</label>
+                        <input type="text" id="ime" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div>
-                        <label for="lastName" class="block text-sm font-medium mb-2">Prezime</label>
-                        <input type="text" id="lastName" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                        <label for="prezime" class="block text-sm font-medium mb-2">Prezime</label>
+                        <input type="text" id="prezime" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div>
                         <label for="email" class="block text-sm font-medium mb-2">Email</label>
                         <input type="email" id="email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div>
-                        <label for="phone" class="block text-sm font-medium mb-2">Broj telefona</label>
-                        <input type="tel" id="phone" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                        <label for="brojTelefona" class="block text-sm font-medium mb-2">Broj telefona</label>
+                        <input type="tel" id="brojTelefona" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div>
                         <label for="instagram" class="block text-sm font-medium mb-2">Instagram</label>
                         <input type="url" id="instagram" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
-                    
+
                     <div>
                         <label for="facebook" class="block text-sm font-medium mb-2">Facebook</label>
                         <input type="url" id="facebook" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
-                    
+
                     <div>
-                        <label for="mixtape" class="block text-sm font-medium mb-2">Link na mixtape</label>
-                        <input type="url" id="mixtape" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                        <label for="linkMixtape" class="block text-sm font-medium mb-2">Link na mixtape</label>
+                        <input type="url" id="linkMixtape" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
-                    <div class="md:col-span-2">
-                        <label for="priceHour" class="block text-sm font-medium mb-2">Cijena po satu (€)</label>
-                        <input type="number" id="priceHour" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+
+                    <div>
+                        <label for="cijenaPoSatu" class="block text-sm font-medium mb-2">Cijena po satu (€)</label>
+                        <input type="number" id="cijenaPoSatu" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required min="0">
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Opcije rezervacije</label>
                         <div class="space-y-2">
@@ -77,7 +82,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Cijena uključuje (dodatna cijena):</label>
                         <div class="grid md:grid-cols-2 gap-4">
@@ -99,34 +104,35 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="md:col-span-2">
-                        <label for="description" class="block text-sm font-medium mb-2">Kratki opis</label>
-                        <textarea id="description" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required></textarea>
+                        <label for="kratkiOpis" class="block text-sm font-medium mb-2">Kratki opis</label>
+                        <textarea id="kratkiOpis" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required></textarea>
                     </div>
-                    
+
                     <div class="md:col-span-2">
-                        <label for="previousJobs" class="block text-sm font-medium mb-2">Prijašnji poslovi</label>
-                        <textarea id="previousJobs" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></textarea>
+                        <label for="prijasnjiPoslovi" class="block text-sm font-medium mb-2">Prijašnji poslovi</label>
+                        <textarea id="prijasnjiPoslovi" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required></textarea>
                     </div>
-                    
+
                     <div>
-                        <label for="djSince" class="block text-sm font-medium mb-2">DJ-ujem od</label>
-                        <input type="date" id="djSince" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                        <label for="radiOd" class="block text-sm font-medium mb-2">DJ-ujem od (godina)</label>
+                        <input type="number" id="radiOd" placeholder="npr. 2015" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required min="1900" max="2100">
                     </div>
-                    
+
                     <div>
-                        <label for="totalYears" class="block text-sm font-medium mb-2">Ukupno godina iskustva</label>
-                        <input type="number" id="totalYears" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                        <label for="ukupnoGodinaIskustva" class="block text-sm font-medium mb-2">Ukupno godina iskustva</label>
+                        <input type="number" id="ukupnoGodinaIskustva" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required min="0">
                     </div>
-                    
+
                     <div class="md:col-span-2">
-                        <label for="password" class="block text-sm font-medium mb-2">Lozinka</label>
-                        <input type="password" id="password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
+                        <label for="lozinka" class="block text-sm font-medium mb-2">Lozinka</label>
+                        <input type="password" id="lozinka" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3" required>
                     </div>
-                    
+
                     <div class="md:col-span-2">
-                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium">
+                        <p id="errorMsg" class="hidden text-red-400 text-sm text-center mb-2"></p>
+                        <button type="submit" id="submitBtn" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium">
                             Registriraj se
                         </button>
                     </div>
@@ -137,6 +143,62 @@
 
     <script>
         feather.replace();
+
+        document.getElementById('registerDjForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const errorMsg = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('submitBtn');
+
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registracija...';
+
+            const cijenaVal = document.getElementById('cijenaPoSatu').value;
+            const radiOdVal = document.getElementById('radiOd').value;
+            const godinaVal = document.getElementById('ukupnoGodinaIskustva').value;
+
+            const payload = {
+                usernameIzvodac: document.getElementById('usernameIzvodac').value.trim(),
+                ime: document.getElementById('ime').value.trim(),
+                prezime: document.getElementById('prezime').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                lozinka: document.getElementById('lozinka').value,
+                brojTelefona: document.getElementById('brojTelefona').value.trim() || null,
+                linkMixtape: document.getElementById('linkMixtape').value.trim() || null,
+                cijenaPoSatu: cijenaVal ? parseFloat(cijenaVal) : null,
+                kratkiOpis: document.getElementById('kratkiOpis').value.trim() || null,
+                prijasnjiPoslovi: document.getElementById('prijasnjiPoslovi').value.trim() || null,
+                radiOd: radiOdVal ? parseInt(radiOdVal) : null,
+                ukupnoGodinaIskustva: godinaVal ? parseInt(godinaVal) : null
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/register/izvodac', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Greška pri registraciji');
+                }
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role);
+                localStorage.setItem('user_logged_in', 'true');
+
+                window.location.href = 'index.html';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Registriraj se';
+            }
+        });
     </script>
 </body>
 </html>
