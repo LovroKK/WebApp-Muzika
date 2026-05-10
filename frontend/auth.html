@@ -15,23 +15,25 @@
     <main class="container mx-auto px-4 py-8 max-w-md">
         <div class="bg-gray-800 rounded-lg p-8">
             <h1 class="text-3xl font-bold mb-6 text-center">Prijava</h1>
-            
-            <form class="space-y-4">
+
+            <form id="loginForm" class="space-y-4">
                 <div>
-                    <label for="email" class="block text-sm font-medium mb-2">Email</label>
-                    <input type="email" id="email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500" required>
+                    <label for="username" class="block text-sm font-medium mb-2">Korisničko ime</label>
+                    <input type="text" id="username" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500" required>
                 </div>
-                
+
                 <div>
                     <label for="password" class="block text-sm font-medium mb-2">Lozinka</label>
                     <input type="password" id="password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500" required>
                 </div>
-                
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium">
-                        Prijavi se
-                    </button>
+
+                <p id="errorMsg" class="hidden text-red-400 text-sm text-center"></p>
+
+                <button type="submit" id="submitBtn" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium">
+                    Prijavi se
+                </button>
             </form>
-            
+
             <div class="mt-6 text-center">
                 <p class="text-gray-400">Nemaš račun?</p>
                 <div class="mt-4 space-y-3">
@@ -48,6 +50,45 @@
 
     <script>
         feather.replace();
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('submitBtn');
+
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Prijava...';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Pogrešno korisničko ime ili lozinka');
+                }
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role);
+                localStorage.setItem('user_logged_in', 'true');
+
+                window.location.href = 'index.html';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Prijavi se';
+            }
+        });
     </script>
 </body>
 </html>
