@@ -58,6 +58,14 @@
                         <h3 class="font-semibold mb-3">Prijašnji poslovi</h3>
                         <p id="displayPoslovi" class="text-sm text-gray-300">—</p>
                     </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-semibold">Omiljeni DJ-evi</h3>
+                            <a href="favorites.html" class="text-purple-400 text-sm hover:underline">Svi favoriti →</a>
+                        </div>
+                        <div id="favoritiProfil" class="text-sm text-gray-400">Učitavanje...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -167,8 +175,29 @@
 
                 document.getElementById('urediBtn').classList.remove('hidden');
                 window._profil = p;
+                ucitajFavoriteProfil();
             } catch {
                 // token nije valjan ili je istekao — gumb ostaje sakriven
+            }
+        }
+
+        async function ucitajFavoriteProfil() {
+            try {
+                const res = await fetch('http://localhost:8080/api/favoriti', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const lista = await res.json();
+                const djFavoriti = lista.filter(f => f.tipFavorita === 'IZVODAC');
+                const el = document.getElementById('favoritiProfil');
+                if (djFavoriti.length === 0) {
+                    el.textContent = 'Još nema omiljenih DJ-eva.';
+                    return;
+                }
+                el.innerHTML = djFavoriti.map(f =>
+                    `<span class="inline-block bg-gray-600 rounded px-2 py-1 mr-2 mb-2">@${f.favoritUsername}</span>`
+                ).join('');
+            } catch {
+                document.getElementById('favoritiProfil').textContent = '—';
             }
         }
 
