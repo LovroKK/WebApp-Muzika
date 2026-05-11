@@ -24,8 +24,19 @@ class BeatSyncNavbar extends HTMLElement {
                     font-size: 12px;
                     font-weight: bold;
                 }
+
+                .profile-dropdown {
+                    padding-bottom: 8px;
+                }
+
                 .profile-dropdown:hover .profile-menu {
                     display: block;
+                }
+
+                .profile-menu {
+                    top: 100%;
+                    right: 0;
+                    margin-top: 0;
                 }
                 
             </style>
@@ -50,7 +61,7 @@ class BeatSyncNavbar extends HTMLElement {
                             <a href="profile.html" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors inline-block" id="profileBtn">
                                 Profil
                             </a>
-                            <div class="profile-menu hidden absolute right-0 mt-2 w-40 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
+                            <div class="profile-menu hidden absolute right-0 w-40 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
                                 <button id="logoutBtn" class="w-full text-left px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 rounded-lg">
                                     Odjavi se
                                 </button>
