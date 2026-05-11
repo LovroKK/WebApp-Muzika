@@ -14,9 +14,6 @@ public class CreateJobOfferRequest {
     private LocalTime kraj;
     private String lokacija;
     private BigDecimal budzet;
-    private String zanrovi;
-    private String opremaZahtjevi;
-    private String ostaloOprema;
     private String opisPosla;
     private String potrebnoIskustvo;
 }

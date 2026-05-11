@@ -1,4 +1,4 @@
-package hr.beatsync.beatsync_backend;
+package hr.beatsync.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -80,13 +80,6 @@
             const kraj = p.kraj ? p.kraj.substring(0, 5) : '—';
             const budzet = p.budzet ? p.budzet + ' €' : 'Po dogovoru';
 
-            const zanroviHtml = p.zanrovi
-                ? p.zanrovi.split(', ').map(z => `<span class="bg-purple-900/60 text-purple-300 px-2 py-0.5 rounded text-xs">${z}</span>`).join(' ')
-                : '';
-
-            const opremaHtml = p.opremaZahtjevi
-                ? '<p class="text-xs text-gray-400 mt-1">Oprema: ' + p.opremaZahtjevi + (p.ostaloOprema ? ', ' + p.ostaloOprema : '') + '</p>'
-                : (p.ostaloOprema ? '<p class="text-xs text-gray-400 mt-1">Oprema: ' + p.ostaloOprema + '</p>' : '');
 
             let akcija = '';
             if (role === 'IZVODAC') {
@@ -111,8 +104,6 @@
                         <div class="flex items-center gap-2"><i data-feather="clock" class="w-4 h-4 text-purple-400 flex-shrink-0"></i>${pocetak} – ${kraj}</div>
                         <div class="flex items-center gap-2"><i data-feather="map-pin" class="w-4 h-4 text-purple-400 flex-shrink-0"></i>${p.lokacija || '—'}</div>
                     </div>
-                    ${zanroviHtml ? `<div class="flex flex-wrap gap-1">${zanroviHtml}</div>` : ''}
-                    ${opremaHtml}
                     ${p.potrebnoIskustvo ? `<p class="text-xs text-gray-400">Iskustvo: ${p.potrebnoIskustvo}</p>` : ''}
                     ${p.opisPosla ? `<p class="text-sm text-gray-300 line-clamp-2">${p.opisPosla}</p>` : ''}
                     <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-700">

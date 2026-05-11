@@ -61,9 +61,6 @@ public class JobOfferController {
                 .kraj(req.getKraj())
                 .lokacija(req.getLokacija())
                 .budzet(req.getBudzet())
-                .zanrovi(req.getZanrovi())
-                .opremaZahtjevi(req.getOpremaZahtjevi())
-                .ostaloOprema(req.getOstaloOprema())
                 .opisPosla(req.getOpisPosla())
                 .potrebnoIskustvo(req.getPotrebnoIskustvo())
                 .businessPonuda(business)
@@ -145,9 +142,6 @@ public class JobOfferController {
                 o.getKraj(),
                 o.getLokacija(),
                 o.getBudzet(),
-                o.getZanrovi(),
-                o.getOpremaZahtjevi(),
-                o.getOstaloOprema(),
                 o.getOpisPosla(),
                 o.getPotrebnoIskustvo(),
                 o.getBusinessPonuda().getUsernameBusiness(),

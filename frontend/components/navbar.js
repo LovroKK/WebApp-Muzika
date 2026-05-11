@@ -24,6 +24,10 @@ class BeatSyncNavbar extends HTMLElement {
                     font-size: 12px;
                     font-weight: bold;
                 }
+                .profile-dropdown:hover .profile-menu {
+                    display: block;
+                }
+                
             </style>
             <nav class="bg-gray-800 py-4 px-6 shadow-lg">
                 <div class="container mx-auto flex justify-between items-center">
@@ -42,9 +46,17 @@ class BeatSyncNavbar extends HTMLElement {
                         <a href="auth.html" id="loginBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-medium transition-colors">
                             Prijava
                         </a>
-                        <a href="profile.html" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors hidden" id="profileBtn">
-                            Profil
-                        </a>
+                        <div id="profileDropdown" class="profile-dropdown relative hidden">
+                            <a href="profile.html" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors inline-block" id="profileBtn">
+                                Profil
+                            </a>
+                            <div class="profile-menu hidden absolute right-0 mt-2 w-40 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
+                                <button id="logoutBtn" class="w-full text-left px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 rounded-lg">
+                                    Odjavi se
+                                </button>
+                            </div>
+                        </div>
+
                         <button id="chatBtn" class="chat-icon-btn bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-colors hidden relative" title="Poruke">
                             <i data-feather="message-circle" class="w-6 h-6 text-purple-400"></i>
                             <span class="notification-badge hidden" id="notificationBadge">3</span>
@@ -91,21 +103,30 @@ class BeatSyncNavbar extends HTMLElement {
                 // TODO: Navigate to messages page or open messages modal
             });
         }
+
+        const logoutBtn = this.querySelector('#logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.logout());
+        }
+
     }
 
     checkLoginState() {
         const isLoggedIn = localStorage.getItem('user_logged_in') === 'true';
         const loginBtn = this.querySelector('#loginBtn');
-        const profileBtn = this.querySelector('#profileBtn');
+        const profileDropdown = this.querySelector('#profileDropdown');
+
         const chatBtn = this.querySelector('#chatBtn');
 
         if (isLoggedIn) {
             loginBtn.classList.add('hidden');
-            profileBtn.classList.remove('hidden');
+            profileDropdown.classList.remove('hidden');
+
             chatBtn.classList.remove('hidden');
         } else {
             loginBtn.classList.remove('hidden');
-            profileBtn.classList.add('hidden');
+            profileDropdown.classList.add('hidden');
+
             chatBtn.classList.add('hidden');
         }
 
@@ -113,7 +134,18 @@ class BeatSyncNavbar extends HTMLElement {
         feather.replace();
     }
 
+        logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        localStorage.removeItem('user_logged_in');
+
+        window.dispatchEvent(new Event('userLoggedOut'));
+        window.location.href = 'index.html';
+    }
+
     setLoginState(loggedIn) {
+
         if (loggedIn) {
             localStorage.setItem('user_logged_in', 'true');
             window.dispatchEvent(new Event('userLoggedIn'));
@@ -135,5 +167,4 @@ class BeatSyncNavbar extends HTMLElement {
         }
     }
 }
-customElements.define('beat-sync-navbar', BeatSyncNavbar);
 customElements.define('beat-sync-navbar', BeatSyncNavbar);

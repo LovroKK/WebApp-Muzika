@@ -138,7 +138,13 @@
             submitBtn.textContent = 'Objavljivanje...';
 
             const zanrovi = [...document.querySelectorAll('.zanr-cb:checked')].map(cb => cb.value).join(', ');
-            const opremaZahtjevi = [...document.querySelectorAll('.oprema-cb:checked')].map(cb => cb.value).join(', ');
+            const oprema = [...document.querySelectorAll('.oprema-cb:checked')].map(cb => cb.value).join(', ');
+            const ostalo = document.getElementById('ostaloOprema').value.trim();
+            const baseOpis = document.getElementById('jobDescription').value.trim();
+
+            let opisPosla = baseOpis;
+            if (zanrovi) opisPosla += '\n\nŽanrovi: ' + zanrovi;
+            if (oprema || ostalo) opisPosla += '\nOprema: ' + [oprema, ostalo].filter(Boolean).join(', ');
 
             const payload = {
                 nazivPonude: document.getElementById('jobTitle').value.trim(),
@@ -147,10 +153,7 @@
                 kraj: document.getElementById('endTime').value + ':00',
                 lokacija: document.getElementById('jobLocation').value.trim(),
                 budzet: parseFloat(document.getElementById('jobBudget').value),
-                zanrovi: zanrovi || null,
-                opremaZahtjevi: opremaZahtjevi || null,
-                ostaloOprema: document.getElementById('ostaloOprema').value.trim() || null,
-                opisPosla: document.getElementById('jobDescription').value.trim(),
+                opisPosla: opisPosla,
                 potrebnoIskustvo: document.getElementById('experienceRequired').value.trim()
             };
 
