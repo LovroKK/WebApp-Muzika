@@ -1,6 +1,8 @@
 
 class BeatSyncNavbar extends HTMLElement {
     connectedCallback() {
+        const profileHref = this.getProfileHref();
+
         this.innerHTML = `
             <style>
                 .navbar-link:hover {
@@ -51,14 +53,14 @@ class BeatSyncNavbar extends HTMLElement {
                         <a href="job-offers.html" class="navbar-link text-gray-300 hover:text-purple-400">Ponude Poslova</a>
                         <a href="how-it-works.html" class="navbar-link text-gray-300 hover:text-purple-400">Kako funkcionira</a>
                         <a href="pricing.html" class="navbar-link text-gray-300 hover:text-purple-400">Cijene</a>
-                        <a href="profile.html" class="navbar-link text-gray-300 hover:text-purple-400">Profil</a>
+                        <a href="${profileHref}" data-profile-link class="navbar-link text-gray-300 hover:text-purple-400">Profil</a>
                     </div>
                     <div class="flex items-center space-x-4">
                         <a href="auth.html" id="loginBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-medium transition-colors">
                             Prijava
                         </a>
                         <div id="profileDropdown" class="profile-dropdown relative hidden">
-                            <a href="profile.html" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors inline-block" id="profileBtn">
+                            <a href="${profileHref}" data-profile-link class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors inline-block" id="profileBtn">
                                 Profil
                             </a>
                             <div class="profile-menu hidden absolute right-0 w-40 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
@@ -84,7 +86,7 @@ class BeatSyncNavbar extends HTMLElement {
                             <a href="job-offers.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Ponude Poslova</a>
                             <a href="how-it-works.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Kako funkcionira</a>
                             <a href="pricing.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Cijene</a>
-                            <a href="profile.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Profil</a>
+                            <a href="${profileHref}" data-profile-link class="block px-2 py-1 text-gray-300 hover:text-purple-400">Profil</a>
                         </div>
 </nav>
         `;
@@ -122,12 +124,26 @@ class BeatSyncNavbar extends HTMLElement {
 
     }
 
+    getProfileHref() {
+        const role = localStorage.getItem('role');
+        return role === 'BUSINESS' ? 'profile-business.html' : 'profile.html';
+    }
+
+    updateProfileLinks() {
+        const profileHref = this.getProfileHref();
+        this.querySelectorAll('[data-profile-link]').forEach(link => {
+            link.setAttribute('href', profileHref);
+        });
+    }
+    
     checkLoginState() {
         const isLoggedIn = localStorage.getItem('user_logged_in') === 'true';
         const loginBtn = this.querySelector('#loginBtn');
         const profileDropdown = this.querySelector('#profileDropdown');
 
         const chatBtn = this.querySelector('#chatBtn');
+
+        this.updateProfileLinks();
 
         if (isLoggedIn) {
             loginBtn.classList.add('hidden');

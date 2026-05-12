@@ -35,13 +35,14 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/equipment/**").permitAll()
-                .requestMatchers("/api/djs/**").permitAll()
+                .requestMatchers("/api/auth", "/api/auth/**").permitAll()
+                .requestMatchers("/api/equipment", "/api/equipment/**").permitAll()
+                .requestMatchers("/api/djs", "/api/djs/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 }
