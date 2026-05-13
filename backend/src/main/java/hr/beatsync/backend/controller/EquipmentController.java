@@ -14,6 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,6 +88,29 @@ public class EquipmentController {
 
         Oprema spremljenaOprema = opremaRepo.save(oprema);
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(spremljenaOprema));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isIzvodac = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_IZVODAC"));
+ 
+        if (!isIzvodac) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Samo izvođači mogu brisati opremu"));
+        }
+ 
+        Oprema oprema = opremaRepo.findByIdOpreme(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Oprema nije pronađena"));
+ 
+        if (!oprema.getVlasnikOpreme().getUsernameIzvodac().equals(auth.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Nemate ovlasti za brisanje ove opreme"));
+        }
+ 
+        opremaRepo.delete(oprema);
+        return ResponseEntity.noContent().build();
     }
 
     private EquipmentResponse toResponse(Oprema oprema) {

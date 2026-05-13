@@ -16,6 +16,9 @@ public interface IzvodacKorisnikRepository extends JpaRepository<IzvodacKorisnik
     Optional<IzvodacKorisnik> findByEmail(String email);
     boolean existsByUsernameIzvodac(String username);
 
+    @Query("SELECT i FROM IzvodacKorisnik i WHERE BINARY(i.usernameIzvodac) = BINARY(:username)")
+    Optional<IzvodacKorisnik> findByUsernameExact(@Param("username") String username);
+
     @Query("SELECT i FROM IzvodacKorisnik i WHERE " +
            "(:search IS NULL OR :search = '' OR " +
            " LOWER(i.ime) LIKE LOWER(CONCAT('%', :search, '%')) OR " +

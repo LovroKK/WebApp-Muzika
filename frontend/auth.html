@@ -70,10 +70,23 @@
                     body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
+                
+                let data = {};
+                const text = await response.text();
+                if (text) {
+                    try {
+                        data = JSON.parse(text);
+                    } catch {
+                        // nije JSON, ignoriraj
+                    }   
+                }
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Pogrešno korisničko ime ili lozinka');
+                    const poruka = data.detail
+                        || data.message
+                        || (response.status === 403 ? 'Pogrešno korisničko ime ili lozinka'
+                            : 'Greška pri prijavi');
+                    throw new Error(poruka);
                 }
 
                 localStorage.setItem('token', data.token);

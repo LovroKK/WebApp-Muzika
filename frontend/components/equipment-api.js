@@ -11,6 +11,10 @@ function getEquipmentRole() {
     return localStorage.getItem('role');
 }
 
+function getEquipmentUsername() {
+    return localStorage.getItem('username');
+}
+
 function parseEquipmentLocations(value) {
     return value
         .split(/\r?\n|,/)
@@ -50,12 +54,61 @@ async function fetchEquipmentListings() {
     equipmentApiListings = Array.isArray(data) ? data.map(normalizeEquipmentListing) : [];
 }
 
+async function deleteEquipmentListing(id, cardElement) {
+    const token = getEquipmentToken();
+    if (!token) return;
+
+    const confirmed = window.confirm('Jeste li sigurni da želite ukloniti ovaj oglas?');
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch(`${EQUIPMENT_API_BASE_URL}/equipment/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        if (!response.ok) {
+            const message = await parseEquipmentApiError(response, 'Greška pri brisanju oglasa.');
+            alert(message);
+            return;
+        }
+
+        // Ukloni iz lokalne liste i DOM-a
+        equipmentApiListings = equipmentApiListings.filter(l => l.id_opreme !== id);
+        cardElement.remove();
+
+        const grid = document.getElementById('equipment-grid');
+        if (grid && grid.children.length === 0) {
+            document.getElementById('emptyEquipmentState').classList.remove('hidden');
+        }
+    } catch (error) {
+        alert('Greška pri brisanju oglasa.');
+    }
+}
+
 function renderEquipmentPageApi() {
     const equipmentGrid = document.getElementById('equipment-grid');
     const emptyEquipmentState = document.getElementById('emptyEquipmentState');
     const listingCreatedMessage = document.getElementById('listingCreatedMessage');
     const filterBtns = document.querySelectorAll('#category-filters .filter-btn');
     const searchInput = document.getElementById('equipment-search');
+    const createEquipmentBtn = document.getElementById('createEquipmentBtn');
+    const equipmentCalloutBox = document.getElementById('equipmentCalloutBox');
+    const currentRoleForBtn = getEquipmentRole(); //vezu se za logiku prikaza gumba za kreiranje opreme
+    const currentTokenForBtn = getEquipmentToken(); //vezu se za logiku prikaza gumba za kreiranje opreme
+    
+    // Prikaži gumb samo ako je korisnik prijavljen i ima ulogu IZVODAC
+    if (createEquipmentBtn) {
+        if (currentTokenForBtn && currentRoleForBtn === 'IZVODAC') {
+            createEquipmentBtn.style.display = 'inline-flex';
+            equipmentCalloutBox.style.display = 'flex';
+        } else {
+            createEquipmentBtn.style.display = 'none';
+            equipmentCalloutBox.style.display = 'none';
+        }
+    }
 
     function escapeHtml(value) {
         return String(value ?? '')
@@ -100,6 +153,9 @@ function renderEquipmentPageApi() {
     }
 
     function renderEquipment() {
+        const currentUsername = getEquipmentUsername() || null;
+        const currentRole = getEquipmentRole() || null;
+
         const filteredListings = getFilteredListings();
 
         if (!filteredListings.length) {
@@ -111,6 +167,7 @@ function renderEquipmentPageApi() {
 
         emptyEquipmentState.classList.add('hidden');
         equipmentGrid.innerHTML = filteredListings.map((listing) => {
+            const id = listing.id_opreme;
             const naziv = escapeHtml(listing.naziv_opreme || 'Nepoznata oprema');
             const kategorija = escapeHtml(listing.kategorija || 'Ostalo');
             const slika = listing.slika || EQUIPMENT_DEFAULT_IMAGE;
@@ -118,13 +175,34 @@ function renderEquipmentPageApi() {
                 ? listing.lokacije.map((lokacija) => escapeHtml(lokacija)).join(', ')
                 : 'Lokacija nije navedena';
 
+            // Prikaži gumb za brisanje samo vlasniku
+            const isVlasnik = currentRole === 'IZVODAC' && currentUsername === listing.vlasnik_opreme;
+            const deleteBtn = isVlasnik
+                ? `<button
+                      data-delete-id="${id}"
+                      title="Ukloni oglas"
+                      class="delete-equipment-btn flex items-center justify-center w-8 h-8 rounded-full bg-red-700/20 hover:bg-red-600 text-red-400 hover:text-white transition"
+                      aria-label="Ukloni oglas">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6l-1 14H6L5 6"></path>
+                          <path d="M10 11v6"></path>
+                          <path d="M14 11v6"></path>
+                          <path d="M9 6V4h6v2"></path>
+                      </svg>
+                   </button>`
+                : '';
+
             return `
-                <article class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500/50 hover:-translate-y-1 transition duration-200 shadow-lg">
+                <article id="equipment-card-${id}" class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500/50 hover:-translate-y-1 transition duration-200 shadow-lg">
                     <img src="${slika}" alt="${naziv}" class="w-full h-48 object-cover" onerror="this.src='${EQUIPMENT_DEFAULT_IMAGE}'">
                     <div class="p-4">
-                        <div class="flex justify-between items-start gap-3 mb-3">
+                        <div class="flex justify-between items-start gap-2 mb-3">
                             <h3 class="font-semibold text-lg leading-tight">${naziv}</h3>
-                            <span class="bg-purple-600 text-xs px-3 py-1 rounded-full whitespace-nowrap">${kategorija}</span>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <span class="bg-purple-600 text-xs px-3 py-1 rounded-full whitespace-nowrap">${kategorija}</span>
+                                ${deleteBtn}
+                            </div>
                         </div>
                         <p class="text-gray-400 text-sm mb-4">Dostupno u: ${lokacije}</p>
                         <div class="flex justify-between items-center gap-3">
@@ -136,6 +214,15 @@ function renderEquipmentPageApi() {
             `;
         }).join('');
 
+        // Veži event listenere za brisanje
+        equipmentGrid.querySelectorAll('.delete-equipment-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.dataset.deleteId, 10);
+                const card = document.getElementById(`equipment-card-${id}`);
+                deleteEquipmentListing(id, card);
+            });
+        });
+
         feather.replace();
     }
 
@@ -143,7 +230,7 @@ function renderEquipmentPageApi() {
         emptyEquipmentState.classList.add('hidden');
         equipmentGrid.innerHTML = `
             <div class="sm:col-span-2 lg:col-span-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-4 text-red-300 text-center">
-                ${escapeHtml(message)}
+                ${String(message ?? '').replace(/</g, '&lt;')}
             </div>
         `;
     }

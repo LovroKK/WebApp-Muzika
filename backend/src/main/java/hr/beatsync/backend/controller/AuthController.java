@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 
-// ----------------------------------------------------------------------------//
-//                                ALL ENDPOINTS
-// ----------------------------------------------------------------------------//
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -97,32 +93,36 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
 
-        // Prvo probaj naći izvođača
-        var izvodacOpt = izvodacRepo.findById(request.getUsername());
+        // Prvo trazi izvođača
+        var izvodacOpt = izvodacRepo.findByUsernameExact(request.getUsername());
         if (izvodacOpt.isPresent()) {
             IzvodacKorisnik izvodac = izvodacOpt.get();
-            if (passwordEncoder.matches(request.getPassword(), izvodac.getLozinka())) {
-                String token = jwtTokenProvider.generateToken(
-                        izvodac.getUsernameIzvodac(), "IZVODAC");
-                return ResponseEntity.ok(
-                        new AuthResponse(token, izvodac.getUsernameIzvodac(), "IZVODAC"));
+ 
+            if (!passwordEncoder.matches(request.getPassword(), izvodac.getLozinka())) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Pogrešno korisničko ime ili lozinka");
             }
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Pogrešna lozinka");
+ 
+            String token = jwtTokenProvider.generateToken(
+                    izvodac.getUsernameIzvodac(), "IZVODAC");
+            return ResponseEntity.ok(
+                    new AuthResponse(token, izvodac.getUsernameIzvodac(), "IZVODAC"));
         }
 
-        // Zatim probaj business korisnika
-        var businessOpt = businessRepo.findById(request.getUsername());
+        // Zatim trazi business korisnika
+        var businessOpt = businessRepo.findByUsernameExact(request.getUsername());
         if (businessOpt.isPresent()) {
             BusinessKorisnik business = businessOpt.get();
-            if (passwordEncoder.matches(request.getPassword(), business.getLozinka())) {
-                String token = jwtTokenProvider.generateToken(
-                        business.getUsernameBusiness(), "BUSINESS");
-                return ResponseEntity.ok(
-                        new AuthResponse(token, business.getUsernameBusiness(), "BUSINESS"));
+ 
+            if (!passwordEncoder.matches(request.getPassword(), business.getLozinka())) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Pogrešno korisničko ime ili lozinka");
             }
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Pogrešna lozinka");
+ 
+            String token = jwtTokenProvider.generateToken(
+                    business.getUsernameBusiness(), "BUSINESS");
+            return ResponseEntity.ok(
+                    new AuthResponse(token, business.getUsernameBusiness(), "BUSINESS"));
         }
-
+ 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnik ne postoji");
     }
 }
