@@ -1,0 +1,1 @@
+{"nodes": [{"id": "dto_CreateJobOfferRequest", "label": "CreateJobOfferRequest DTO", "file_type": "code", "source_file": "backend/src/main/java/hr/beatsync/backend/dto/CreateJobOfferRequest.java", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}
