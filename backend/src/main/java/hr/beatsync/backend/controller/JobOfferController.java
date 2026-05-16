@@ -3,13 +3,16 @@ package hr.beatsync.backend.controller;
 import hr.beatsync.backend.dto.CreateJobOfferRequest;
 import hr.beatsync.backend.dto.JobOfferResponse;
 import hr.beatsync.backend.enums.StatusRezervacije;
+import hr.beatsync.backend.enums.VrstaPosiljatelja;
 import hr.beatsync.backend.model.BusinessKorisnik;
 import hr.beatsync.backend.model.IzvodacKorisnik;
 import hr.beatsync.backend.model.JobOffer;
+import hr.beatsync.backend.model.Poruka;
 import hr.beatsync.backend.model.Rezervacija;
 import hr.beatsync.backend.repository.BusinessKorisnikRepository;
 import hr.beatsync.backend.repository.IzvodacKorisnikRepository;
 import hr.beatsync.backend.repository.JobOfferRepository;
+import hr.beatsync.backend.repository.PorukaRepository;
 import hr.beatsync.backend.repository.RezervacijaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +33,18 @@ public class JobOfferController {
     private final BusinessKorisnikRepository businessRepo;
     private final IzvodacKorisnikRepository izvodacRepo;
     private final RezervacijaRepository rezervacijaRepo;
+    private final PorukaRepository porukaRepo;
 
     public JobOfferController(JobOfferRepository jobOfferRepo,
                               BusinessKorisnikRepository businessRepo,
                               IzvodacKorisnikRepository izvodacRepo,
-                              RezervacijaRepository rezervacijaRepo) {
+                              RezervacijaRepository rezervacijaRepo,
+                              PorukaRepository porukaRepo) {
         this.jobOfferRepo = jobOfferRepo;
         this.businessRepo = businessRepo;
         this.izvodacRepo = izvodacRepo;
         this.rezervacijaRepo = rezervacijaRepo;
+        this.porukaRepo = porukaRepo;
     }
 
     @PostMapping
@@ -80,7 +86,7 @@ public class JobOfferController {
         if (isBusiness) {
             List<JobOfferResponse> offers = jobOfferRepo.findByBusinessPonuda_UsernameBusiness(username)
                     .stream()
-                    .map(o -> toResponse(o, false))
+                    .map(o -> toResponseBusiness(o))
                     .toList();
             return ResponseEntity.ok(offers);
         } else {
@@ -125,11 +131,28 @@ public class JobOfferController {
                 .periodDo(periodDo)
                 .statusRezervacije(StatusRezervacije.REQUESTED)
                 .potvrdaRezervacije(false)
+                .potvrdaIzvodac(false)
+                .potvrdaBusiness(false)
                 .izvodacRezervacija(izvodac)
                 .businessRezervacija(offer.getBusinessPonuda())
                 .build();
 
         rezervacijaRepo.save(rez);
+
+        // Auto-kreira SYSTEM_NOTIFICATION za business
+        Poruka notif = Poruka.builder()
+                .sadrzajPoruke(izvodac.getIme() + " " + izvodac.getPrezime()
+                        + " se prijavio/la na ponudu \"" + offer.getNazivPonude() + "\".")
+                .posiljatelj(VrstaPosiljatelja.IZVODAC)
+                .izvodacPoruka(izvodac)
+                .businessPoruka(offer.getBusinessPonuda())
+                .idRezervacije(rez.getIdRezervacije())
+                .messageType("SYSTEM_NOTIFICATION")
+                .readStatus(false)
+                .timestampPoruke(LocalDateTime.now())
+                .build();
+        porukaRepo.save(notif);
+
         return ResponseEntity.ok(Map.of("poruka", "Uspješno ste se prijavili na ponudu"));
     }
 
@@ -146,7 +169,28 @@ public class JobOfferController {
                 o.getPotrebnoIskustvo(),
                 o.getBusinessPonuda().getUsernameBusiness(),
                 o.getBusinessPonuda().getNazivKluba(),
-                jeliPrijavljen
+                jeliPrijavljen,
+                0
+        );
+    }
+
+    private JobOfferResponse toResponseBusiness(JobOffer o) {
+        int brojPrijava = (int) rezervacijaRepo.countByJobOffer_IdPonudeAndStatusRezervacije(
+                o.getIdPonude(), StatusRezervacije.REQUESTED);
+        return new JobOfferResponse(
+                o.getIdPonude(),
+                o.getNazivPonude(),
+                o.getDatum(),
+                o.getPocetak(),
+                o.getKraj(),
+                o.getLokacija(),
+                o.getBudzet(),
+                o.getOpisPosla(),
+                o.getPotrebnoIskustvo(),
+                o.getBusinessPonuda().getUsernameBusiness(),
+                o.getBusinessPonuda().getNazivKluba(),
+                false,
+                brojPrijava
         );
     }
 }

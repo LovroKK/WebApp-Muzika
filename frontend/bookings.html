@@ -77,19 +77,34 @@
             const do_ = r.periodDo ? r.periodDo.substring(11, 16) : '—';
             const budzet = r.budzet ? r.budzet + ' €' : '—';
 
+            // Potvrda indikatori
+            let potvrdaInfo = '';
+            if (r.statusRezervacije === 'REQUESTED') {
+                const ikBusiness = r.potvrdaBusiness
+                    ? '<span class="text-green-400" title="Klub potvrdio">✓ Klub</span>'
+                    : '<span class="text-gray-500" title="Klub nije potvrdio">○ Klub</span>';
+                const ikIzvodac = r.potvrdaIzvodac
+                    ? '<span class="text-green-400" title="Izvođač potvrdio">✓ Izvođač</span>'
+                    : '<span class="text-gray-500" title="Izvođač nije potvrdio">○ Izvođač</span>';
+                potvrdaInfo = `<div class="flex gap-3 text-xs mt-1">${ikBusiness} ${ikIzvodac}</div>`;
+            }
+
             let akcije = '';
             if (role === 'BUSINESS') {
                 if (r.statusRezervacije === 'REQUESTED') {
                     akcije = `
-                        <button onclick="promijeniStatus(${r.idRezervacije}, 'ACCEPTED', this)" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm">Prihvati</button>
-                        <button onclick="promijeniStatus(${r.idRezervacije}, 'CANCELLED', this)" class="bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-sm">Odbij</button>`;
-                } else if (r.statusRezervacije === 'ACCEPTED') {
-                    akcije = `
-                        <button onclick="promijeniStatus(${r.idRezervacije}, 'IN_PROGRESS', this)" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm">Označi u tijeku</button>
-                        <button onclick="promijeniStatus(${r.idRezervacije}, 'CANCELLED', this)" class="bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-sm">Otkaži</button>`;
+                        <button onclick="otvoreChatNavbar(${r.idRezervacije})" class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded text-sm flex items-center gap-1">
+                            <i data-feather="message-circle" class="w-3 h-3"></i> Otvori chat
+                        </button>`;
                 } else if (r.statusRezervacije === 'IN_PROGRESS') {
                     akcije = `
-                        <button onclick="promijeniStatus(${r.idRezervacije}, 'COMPLETED', this)" class="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded text-sm">Označi završenim</button>`;
+                        <button onclick="zavrsiRezervaciju(${r.idRezervacije}, this)" class="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded text-sm">Označi završenim</button>`;
+                }
+            } else {
+                // IZVODAC
+                if (r.statusRezervacije === 'REQUESTED') {
+                    akcije = `
+                        <button onclick="povuciPrijavu(${r.idRezervacije}, this)" class="bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-sm">Povuci prijavu</button>`;
                 }
             }
 
@@ -111,16 +126,41 @@
                                 <span><i data-feather="clock" class="w-3 h-3 inline mr-1"></i>${od} – ${do_}</span>
                                 <span class="text-purple-400 font-medium">${budzet}</span>
                             </div>
+                            ${potvrdaInfo}
                         </div>
                         ${akcije ? `<div class="flex gap-2 flex-shrink-0">${akcije}</div>` : ''}
                     </div>
                 </div>`;
         }
 
-        async function promijeniStatus(id, status, btn) {
+        function otvoreChatNavbar(rezId) {
+            const navbar = document.querySelector('beat-sync-navbar');
+            if (navbar) {
+                navbar._openPanel();
+                // Otvori direktno tu konverzaciju nakon kratke pauze da se panel otvori
+                setTimeout(() => navbar._openConversation(rezId, {}), 100);
+            }
+        }
+
+        async function zavrsiRezervaciju(id, btn) {
             btn.disabled = true;
             try {
-                const res = await fetch(`http://localhost:8080/api/rezervacije/${id}/status?status=${status}`, {
+                const res = await fetch(`http://localhost:8080/api/rezervacije/${id}/zavrsi`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error();
+                ucitaj();
+            } catch {
+                btn.disabled = false;
+                btn.textContent = 'Greška';
+            }
+        }
+
+        async function povuciPrijavu(id, btn) {
+            btn.disabled = true;
+            try {
+                const res = await fetch(`http://localhost:8080/api/rezervacije/${id}/otkazi`, {
                     method: 'PUT',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });

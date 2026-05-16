@@ -31,10 +31,20 @@ public class Rezervacija {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_rezervacije", nullable = false)
+    @Builder.Default
     private StatusRezervacije statusRezervacije = StatusRezervacije.REQUESTED;
 
     @Column(name = "potvrda_rezervacije", nullable = false)
+    @Builder.Default
     private Boolean potvrdaRezervacije = false;
+
+    @Column(name = "potvrda_izvodac", nullable = false)
+    @Builder.Default
+    private Boolean potvrdaIzvodac = false;
+
+    @Column(name = "potvrda_business", nullable = false)
+    @Builder.Default
+    private Boolean potvrdaBusiness = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username_izvodac", nullable = false)

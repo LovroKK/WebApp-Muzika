@@ -15,6 +15,8 @@ public class RezervacijaResponse {
     private LocalDateTime periodDo;
     private String statusRezervacije;
     private Boolean potvrdaRezervacije;
+    private Boolean potvrdaIzvodac;
+    private Boolean potvrdaBusiness;
 
     private String izvodacUsername;
     private String izvodacIme;
@@ -34,6 +36,8 @@ public class RezervacijaResponse {
         dto.setPeriodDo(r.getPeriodDo());
         dto.setStatusRezervacije(r.getStatusRezervacije().name());
         dto.setPotvrdaRezervacije(r.getPotvrdaRezervacije());
+        dto.setPotvrdaIzvodac(r.getPotvrdaIzvodac());
+        dto.setPotvrdaBusiness(r.getPotvrdaBusiness());
 
         dto.setIzvodacUsername(r.getIzvodacRezervacija().getUsernameIzvodac());
         dto.setIzvodacIme(r.getIzvodacRezervacija().getIme());

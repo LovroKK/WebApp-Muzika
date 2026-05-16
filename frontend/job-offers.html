@@ -156,7 +156,10 @@
                     akcija = `<button onclick="prijaviSe(${p.idPonude}, this)" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm transition">Prijavi se</button>`;
                 }
             } else if (role === 'BUSINESS') {
-                akcija = `<span class="text-xs text-gray-400">Vaša ponuda</span>`;
+                const bpBadge = p.brojPrijava > 0
+                    ? `<span class="bg-yellow-700/60 text-yellow-300 text-xs px-2 py-1 rounded ml-2">Prijave: ${p.brojPrijava}</span>`
+                    : '';
+                akcija = `<span class="text-xs text-gray-400 flex items-center gap-1">Vaša ponuda${bpBadge}</span>`;
             }
 
             return `

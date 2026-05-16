@@ -20,12 +20,14 @@ public class Poruka {
     private Integer idPoruke;
 
     @Column(name = "timestamp_poruke", nullable = false)
+    @Builder.Default
     private LocalDateTime timestampPoruke = LocalDateTime.now();
 
     @Column(name = "sadrzaj_poruke", nullable = false, length = 5000)
     private String sadrzajPoruke;
 
     @Column(name = "read_status", nullable = false)
+    @Builder.Default
     private Boolean readStatus = false;
 
     @Enumerated(EnumType.STRING)
@@ -39,4 +41,11 @@ public class Poruka {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username_business", nullable = false)
     private BusinessKorisnik businessPoruka;
+
+    @Column(name = "id_rezervacije")
+    private Integer idRezervacije;
+
+    @Column(name = "message_type", nullable = false, length = 20)
+    @Builder.Default
+    private String messageType = "CHAT";
 }

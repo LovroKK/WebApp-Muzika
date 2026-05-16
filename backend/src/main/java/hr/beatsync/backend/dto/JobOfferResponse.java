@@ -22,4 +22,5 @@ public class JobOfferResponse {
     private String businessUsername;
     private String nazivKluba;
     private boolean jeliPrijavljen;
+    private int brojPrijava;
 }
