@@ -31,8 +31,9 @@ public class Oprema {
     @Column(name = "kategorija", nullable = false)
     private KategorijaOpreme kategorija;
 
-    @Column(name = "slika")
-    private String slika;
+    @Lob
+    @Column(name = "slika", columnDefinition = "LONGBLOB")
+    private byte[] slika;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vlasnik_opreme", nullable = false)

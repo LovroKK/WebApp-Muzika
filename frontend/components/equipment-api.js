@@ -170,7 +170,7 @@ function renderEquipmentPageApi() {
             const id = listing.id_opreme;
             const naziv = escapeHtml(listing.naziv_opreme || 'Nepoznata oprema');
             const kategorija = escapeHtml(listing.kategorija || 'Ostalo');
-            const slika = listing.slika || EQUIPMENT_DEFAULT_IMAGE;
+            const slika = listing.slika ? 'http://localhost:8080' + listing.slika : EQUIPMENT_DEFAULT_IMAGE;
             const lokacije = Array.isArray(listing.lokacije) && listing.lokacije.length
                 ? listing.lokacije.map((lokacija) => escapeHtml(lokacija)).join(', ')
                 : 'Lokacija nije navedena';
@@ -283,7 +283,7 @@ function renderCreateEquipmentPageApi() {
     const imageInput = document.getElementById('slika');
     const imagePreview = document.getElementById('imagePreview');
     const imagePreviewWrapper = document.getElementById('imagePreviewWrapper');
-    let selectedImageUrl = '';
+    let selectedImageFile = null;
 
     function setMessage(element, message) {
         element.textContent = message;
@@ -298,33 +298,46 @@ function renderCreateEquipmentPageApi() {
     }
 
     function resetImagePreview() {
-        selectedImageUrl = '';
+        selectedImageFile = null;
         imagePreview.src = '';
         imagePreviewWrapper.classList.add('hidden');
     }
 
-    imageInput.addEventListener('input', () => {
-        selectedImageUrl = imageInput.value.trim();
+    imageInput.addEventListener('change', () => {
+        const file = imageInput.files[0];
 
-        if (!selectedImageUrl) {
+        if (!file) {
             resetImagePreview();
             return;
         }
 
-        imagePreview.src = selectedImageUrl;
-        imagePreviewWrapper.classList.remove('hidden');
-    });
-
-    imagePreview.addEventListener('error', () => {
-        imagePreviewWrapper.classList.add('hidden');
-        setMessage(errorMessage, 'Uneseni URL slike nije valjan ili slika nije dostupna.');
-    });
-
-    imagePreview.addEventListener('load', () => {
-        if (selectedImageUrl) {
-            clearMessages();
-            imagePreviewWrapper.classList.remove('hidden');
+        // Validacija
+        if (file.size > 5 * 1024 * 1024) {
+            setMessage(errorMessage, 'Datoteka je prevelika. Maksimalna veličina je 5MB.');
+            imageInput.value = '';
+            return;
         }
+
+        if (!file.type.startsWith('image/')) {
+            setMessage(errorMessage, 'Datoteka nije slika. Odaberi sliku u formatu JPG, PNG, GIF ili WebP.');
+            imageInput.value = '';
+            return;
+        }
+
+        selectedImageFile = file;
+        clearMessages();
+
+        // Prikaži pregled
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreviewWrapper.classList.remove('hidden');
+        };
+        reader.onerror = () => {
+            setMessage(errorMessage, 'Greška pri čitanju datoteke.');
+            resetImagePreview();
+        };
+        reader.readAsDataURL(file);
     });
 
     form.addEventListener('submit', async (event) => {
@@ -338,22 +351,26 @@ function renderCreateEquipmentPageApi() {
             return;
         }
 
-        const payload = {
-            nazivOpreme: document.getElementById('nazivOpreme').value.trim(),
-            cijena: Number(document.getElementById('cijena').value),
-            kategorija: document.getElementById('kategorija').value,
-            slika: selectedImageUrl || null,
-            lokacije
-        };
+        const formData = new FormData();
+        formData.append('nazivOpreme', document.getElementById('nazivOpreme').value.trim());
+        formData.append('cijena', Number(document.getElementById('cijena').value));
+        formData.append('kategorija', document.getElementById('kategorija').value);
+        lokacije.forEach((lokacija, index) => {
+            formData.append(`lokacije`, lokacija);
+        });
+
+        if (selectedImageFile) {
+            formData.append('slika', selectedImageFile);
+        }
 
         try {
             const response = await fetch(`${EQUIPMENT_API_BASE_URL}/equipment`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify(payload)
+                body: formData
+                // Napomena: Ne postavljamo Content-Type header - browser će automatski postaviti multipart/form-data
             });
 
             if (!response.ok) {

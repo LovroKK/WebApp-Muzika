@@ -173,7 +173,7 @@ function renderEquipmentPage() {
         equipmentGrid.innerHTML = filteredListings.map((listing) => {
             const naziv = escapeHtml(listing.naziv_opreme || 'Nepoznata oprema');
             const kategorija = escapeHtml(listing.kategorija || 'Ostalo');
-            const slika = listing.slika || DEFAULT_IMAGE;
+            const slika = listing.slika ? 'http://localhost:8080' + listing.slika : DEFAULT_IMAGE;
             const lokacije = Array.isArray(listing.lokacije) && listing.lokacije.length
                 ? listing.lokacije.map((lokacija) => escapeHtml(lokacija)).join(', ')
                 : 'Lokacija nije navedena';

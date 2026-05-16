@@ -23,8 +23,6 @@ public class CreateEquipmentRequest {
     @NotNull
     private KategorijaOpreme kategorija;
 
-    private String slika;
-
     @NotEmpty
     private List<@NotBlank String> lokacije;
 }

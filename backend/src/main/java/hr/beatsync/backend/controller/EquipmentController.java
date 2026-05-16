@@ -2,12 +2,14 @@ package hr.beatsync.backend.controller;
 
 import hr.beatsync.backend.dto.CreateEquipmentRequest;
 import hr.beatsync.backend.dto.EquipmentResponse;
+import hr.beatsync.backend.enums.KategorijaOpreme;
 import hr.beatsync.backend.model.IzvodacKorisnik;
 import hr.beatsync.backend.model.Oprema;
 import hr.beatsync.backend.model.OpremaLokacije;
 import hr.beatsync.backend.repository.IzvodacKorisnikRepository;
 import hr.beatsync.backend.repository.OpremaRepository;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,9 +20,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +54,13 @@ public class EquipmentController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody CreateEquipmentRequest req) {
+    public ResponseEntity<?> create(
+            @RequestParam("nazivOpreme") String nazivOpreme,
+            @RequestParam("cijena") java.math.BigDecimal cijena,
+            @RequestParam("kategorija") String kategorija,
+            @RequestParam(value = "slika", required = false) MultipartFile slika,
+            @RequestParam("lokacije") List<String> lokacije) {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isIzvodac = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_IZVODAC"));
@@ -62,15 +73,25 @@ public class EquipmentController {
         IzvodacKorisnik vlasnik = izvodacRepo.findById(auth.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Izvođač nije pronađen"));
 
+        byte[] slikaBytes = null;
+        if (slika != null && !slika.isEmpty()) {
+            validateImageFile(slika);
+            try {
+                slikaBytes = slika.getBytes();
+            } catch (IOException e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška pri čitanju datoteke");
+            }
+        }
+
         Oprema oprema = Oprema.builder()
-                .nazivOpreme(req.getNazivOpreme().trim())
-                .cijena(req.getCijena())
-                .kategorija(req.getKategorija())
-                .slika(normalizeSlika(req.getSlika()))
+                .nazivOpreme(nazivOpreme.trim())
+                .cijena(cijena)
+                .kategorija(KategorijaOpreme.fromValue(kategorija))
+                .slika(slikaBytes)
                 .vlasnikOpreme(vlasnik)
                 .build();
 
-        List<OpremaLokacije> lokacije = req.getLokacije().stream()
+        List<OpremaLokacije> lokacijeList = lokacije.stream()
                 .map(String::trim)
                 .filter(lokacija -> !lokacija.isBlank())
                 .map(lokacija -> OpremaLokacije.builder()
@@ -79,12 +100,12 @@ public class EquipmentController {
                         .build())
                 .toList();
 
-        if (lokacije.isEmpty()) {
+        if (lokacijeList.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Potrebna je barem jedna lokacija"));
         }
 
-        oprema.setLokacije(new ArrayList<>(lokacije));
+        oprema.setLokacije(new ArrayList<>(lokacijeList));
 
         Oprema spremljenaOprema = opremaRepo.save(oprema);
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(spremljenaOprema));
@@ -114,12 +135,13 @@ public class EquipmentController {
     }
 
     private EquipmentResponse toResponse(Oprema oprema) {
+        String slikaUrl = oprema.getSlika() != null ? "/api/equipment/" + oprema.getIdOpreme() + "/slika" : null;
         return new EquipmentResponse(
                 oprema.getIdOpreme(),
                 oprema.getNazivOpreme(),
                 oprema.getCijena(),
                 oprema.getKategorija(),
-                oprema.getSlika(),
+                slikaUrl,
                 oprema.getVlasnikOpreme().getUsernameIzvodac(),
                 oprema.getLokacije().stream()
                         .map(OpremaLokacije::getLokacija)
@@ -127,11 +149,63 @@ public class EquipmentController {
         );
     }
 
-    private String normalizeSlika(String slika) {
-        if (slika == null || slika.isBlank()) {
-            return null;
+    @GetMapping("/{id}/slika")
+    public ResponseEntity<byte[]> getSlika(@PathVariable Integer id) {
+        Oprema oprema = opremaRepo.findByIdOpreme(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Oprema nije pronađena"));
+
+        if (oprema.getSlika() == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        return slika.trim();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
+                .header(HttpHeaders.CACHE_CONTROL, "max-age=86400")
+                .body(oprema.getSlika());
+    }
+
+    @PostMapping("/{id}/slika")
+    public ResponseEntity<?> uploadSlika(@PathVariable Integer id, @RequestParam("slika") MultipartFile slika) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Oprema oprema = opremaRepo.findByIdOpreme(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Oprema nije pronađena"));
+
+        if (!oprema.getVlasnikOpreme().getUsernameIzvodac().equals(auth.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Nemate ovlasti za dodavanje slike ovoj opremi"));
+        }
+
+        validateImageFile(slika);
+
+        try {
+            oprema.setSlika(slika.getBytes());
+            opremaRepo.save(oprema);
+            return ResponseEntity.ok(Map.of("poruka", "Slika uspješno pohranjena"));
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Greška pri čitanju datoteke");
+        }
+    }
+
+    private void validateImageFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datoteka je prazna");
+        }
+        String ct = file.getContentType();
+        String originalFilename = file.getOriginalFilename();
+        System.out.println("DEBUG: contentType=" + ct + ", filename=" + originalFilename + ", size=" + file.getSize());
+
+        if (ct == null || (!ct.startsWith("image/") && !isImageByExtension(originalFilename))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dopuštene su samo slike (content-type: " + ct + ")");
+        }
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Maksimalna veličina slike je 5MB");
+        }
+    }
+
+    private boolean isImageByExtension(String filename) {
+        if (filename == null) return false;
+        String lower = filename.toLowerCase();
+        return lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") ||
+               lower.endsWith(".gif") || lower.endsWith(".webp") || lower.endsWith(".bmp");
     }
 }

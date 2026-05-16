@@ -59,9 +59,9 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <label for="slika" class="block text-sm font-medium mb-2">URL slike opreme</label>
-                        <input type="url" id="slika" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500" placeholder="https://example.com/slika.jpg">
-                        <p class="text-xs text-gray-400 mt-2">Unesi javno dostupan URL slike. Ako polje ostane prazno, koristit će se zadana ilustracija.</p>
+                        <label for="slika" class="block text-sm font-medium mb-2">Slika opreme</label>
+                        <input type="file" id="slika" accept="image/*" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500">
+                        <p class="text-xs text-gray-400 mt-2">Odaberi sliku sa svojeg računala. Dozvoljeni formati: JPG, PNG, GIF, WebP. Maksimalna veličina: 5MB. Ako polje ostane prazno, koristit će se zadana ilustracija.</p>
                         <div id="imagePreviewWrapper" class="hidden mt-4">
                             <p class="text-sm text-gray-300 mb-2">Pregled odabrane slike</p>
                             <img id="imagePreview" src="" alt="Pregled slike opreme" class="w-full max-w-xs h-48 object-cover rounded-lg border border-gray-600">
