@@ -26,6 +26,31 @@
             <a href="auth.html" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium">Prijava</a>
         </div>
 
+        <!-- Filteri -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-6 border border-gray-700 flex flex-wrap gap-3 items-end">
+            <div class="flex flex-col gap-1 min-w-[120px]">
+                <label class="text-xs text-gray-400">Min iznos (€)</label>
+                <input id="filterMinBudzet" type="number" min="0" placeholder="0"
+                    class="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:border-purple-500 w-full">
+            </div>
+            <div class="flex flex-col gap-1 min-w-[120px]">
+                <label class="text-xs text-gray-400">Max iznos (€)</label>
+                <input id="filterMaxBudzet" type="number" min="0" placeholder="∞"
+                    class="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:border-purple-500 w-full">
+            </div>
+            <div class="flex flex-col gap-1 flex-1 min-w-[160px]">
+                <label class="text-xs text-gray-400">Lokacija</label>
+                <input id="filterLokacija" type="text" placeholder="Npr. Zagreb, Split..."
+                    class="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:border-purple-500 w-full">
+            </div>
+            <button onclick="primijeniFiltre()" class="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded text-sm font-medium transition">
+                Pretraži
+            </button>
+            <button onclick="resetirajFiltre()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-medium transition">
+                Reset
+            </button>
+        </div>
+
         <div id="jobOffersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
         <div id="emptyState" class="hidden text-center py-16">
@@ -40,6 +65,7 @@
 
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
+        let sveponude = [];
 
         if (!token) {
             document.getElementById('loginMsg').classList.remove('hidden');
@@ -61,20 +87,58 @@
 
                 if (!res.ok) throw new Error();
 
-                const ponude = await res.json();
-                const container = document.getElementById('jobOffersContainer');
-
-                if (ponude.length === 0) {
-                    document.getElementById('emptyState').classList.remove('hidden');
-                    return;
-                }
-
-                container.innerHTML = ponude.map(p => renderKartica(p)).join('');
-                feather.replace();
+                sveponude = await res.json();
+                prikaziPonude(sveponude);
             } catch {
                 document.getElementById('jobOffersContainer').innerHTML =
                     '<p class="col-span-3 text-center text-red-400">Greška pri učitavanju ponuda.</p>';
             }
+        }
+
+        function prikaziPonude(ponude) {
+            const container = document.getElementById('jobOffersContainer');
+            const emptyState = document.getElementById('emptyState');
+            if (ponude.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                container.innerHTML = ponude.map(p => renderKartica(p)).join('');
+                feather.replace();
+            }
+        }
+
+        function primijeniFiltre() {
+            const minBudzet = parseFloat(document.getElementById('filterMinBudzet').value) || 0;
+            const maxBudzet = parseFloat(document.getElementById('filterMaxBudzet').value) || Infinity;
+            const lokacija = document.getElementById('filterLokacija').value.trim().toLowerCase();
+
+            const filtrirane = sveponude.filter(p => {
+                const budzet = p.budzet != null ? parseFloat(p.budzet) : null;
+
+                if (budzet !== null) {
+                    if (budzet < minBudzet || budzet > maxBudzet) return false;
+                }
+
+                if (lokacija) {
+                    const lokacijaPonude = (p.lokacija || '').toLowerCase();
+                    // Provjeri sadrži li lokacija ponude barem jednu od upisanih riječi
+                    const rijeci = lokacija.split(/\s+/).filter(Boolean);
+                    const pronasao = rijeci.some(r => lokacijaPonude.includes(r));
+                    if (!pronasao) return false;
+                }
+
+                return true;
+            });
+
+            prikaziPonude(filtrirane);
+        }
+
+        function resetirajFiltre() {
+            document.getElementById('filterMinBudzet').value = '';
+            document.getElementById('filterMaxBudzet').value = '';
+            document.getElementById('filterLokacija').value = '';
+            prikaziPonude(sveponude);
         }
 
         function renderKartica(p) {
