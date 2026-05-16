@@ -24,6 +24,11 @@
                         <h2 id="displayNaziv" class="text-xl font-semibold mb-2">—</h2>
                         <p id="displayUsername" class="text-gray-400 mb-2">—</p>
                         <p id="displayLokacija" class="text-gray-400 text-sm mb-4">—</p>
+                        <input type="file" id="avatarFileInput" accept="image/*" class="hidden">
+                        <button id="avatarUploadBtn" onclick="document.getElementById('avatarFileInput').click()" class="hidden w-full bg-gray-600 hover:bg-gray-500 py-2 rounded-lg font-medium text-sm mb-2">
+                            Promijeni logo
+                        </button>
+                        <p id="avatarUploadStatus" class="text-xs text-center mb-2 hidden"></p>
                         <button id="urediBtn" onclick="openEditModal()" class="hidden w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium text-sm">
                             Uredi Profil
                         </button>
@@ -56,6 +61,18 @@
                     <div class="bg-gray-700 rounded-lg p-4">
                         <h3 class="font-semibold mb-3">Top suradnici</h3>
                         <p id="displayNajbolji" class="text-sm text-gray-300">—</p>
+                    </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-semibold">Slike prostora</h3>
+                            <button id="dodajSlikuBtn" onclick="document.getElementById('slikaFileInput').click()" class="hidden bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm font-medium">
+                                + Dodaj sliku
+                            </button>
+                        </div>
+                        <input type="file" id="slikaFileInput" accept="image/*" class="hidden">
+                        <p id="slikaUploadStatus" class="text-xs text-center mb-2 hidden"></p>
+                        <div id="slikeGalerija" class="grid grid-cols-2 gap-2 mt-2"></div>
                     </div>
                 </div>
             </div>
@@ -147,13 +164,16 @@
                 }
 
                 if (p.logoAvatar) {
-                    document.getElementById('avatarImg').src = p.logoAvatar;
+                    document.getElementById('avatarImg').src = 'http://localhost:8080' + p.logoAvatar;
                 } else {
                     document.getElementById('avatarImg').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nazivKluba) + '&background=7c3aed&color=fff&size=128';
                 }
 
                 document.getElementById('urediBtn').classList.remove('hidden');
+                document.getElementById('avatarUploadBtn').classList.remove('hidden');
+                document.getElementById('dodajSlikuBtn').classList.remove('hidden');
                 window._profil = p;
+                ucitajSlikeProstora();
             } catch {
                 // token nije valjan ili je istekao — gumb ostaje sakriven
             }
@@ -224,6 +244,110 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Spremi';
+            }
+        });
+
+        async function ucitajSlikeProstora() {
+            const p = window._profil;
+            if (!p || !p.slikeProstoraIds) return;
+
+            const galerija = document.getElementById('slikeGalerija');
+            if (p.slikeProstoraIds.length === 0) {
+                galerija.innerHTML = '<p class="text-gray-400 text-sm col-span-2">Nema slika prostora.</p>';
+                return;
+            }
+
+            galerija.innerHTML = p.slikeProstoraIds.map(id => `
+                <div class="relative group">
+                    <img src="http://localhost:8080/api/business/slike/${id}"
+                         class="w-full h-32 object-cover rounded cursor-pointer hover:opacity-80"
+                         alt="Slika prostora">
+                    <button onclick="obrisiSliku(${id})"
+                            class="absolute top-1 right-1 bg-red-600 text-white rounded px-2 py-1 text-xs opacity-0 group-hover:opacity-100 transition font-medium">
+                        Obriši
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function obrisiSliku(id) {
+            if (!confirm('Obrisati sliku?')) return;
+
+            try {
+                const res = await fetch('http://localhost:8080/api/business/slike/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!res.ok) throw new Error();
+                ucitajProfil();
+            } catch {
+                alert('Greška pri brisanju slike.');
+            }
+        }
+
+        document.getElementById('avatarFileInput').addEventListener('change', async function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById('avatarUploadStatus');
+            statusEl.textContent = 'Učitavanje...';
+            statusEl.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('http://localhost:8080/api/business/avatar', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Greška: ' + res.status);
+                }
+
+                statusEl.textContent = 'Logo uspješno promijenjen!';
+                document.getElementById('avatarImg').src = 'http://localhost:8080/api/business/avatar/' + window._profil.usernameBusiness + '?t=' + Date.now();
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+            } catch (err) {
+                console.error('Logo upload error:', err);
+                statusEl.textContent = 'Greška: ' + (err.message || 'Upload nije uspio');
+            }
+        });
+
+        document.getElementById('slikaFileInput').addEventListener('change', async function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById('slikaUploadStatus');
+            statusEl.textContent = 'Učitavanje...';
+            statusEl.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('http://localhost:8080/api/business/slike', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Greška: ' + res.status);
+                }
+
+                statusEl.textContent = 'Slika dodana!';
+                document.getElementById('slikaFileInput').value = '';
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+                ucitajProfil();
+            } catch (err) {
+                console.error('Slika upload error:', err);
+                statusEl.textContent = 'Greška: ' + (err.message || 'Upload nije uspio');
             }
         });
 

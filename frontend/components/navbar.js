@@ -44,7 +44,7 @@ class BeatSyncNavbar extends HTMLElement {
             </style>
             <nav class="bg-gray-800 py-4 px-6 shadow-lg">
                 <div class="container mx-auto flex justify-between items-center">
-                    <a href="/" class="flex items-center">
+                    <a href="index.html" class="flex items-center">
                         <span class="text-2xl font-bold text-purple-400">BeatSync</span>
                     </a>
                     <div class="hidden md:flex space-x-8">

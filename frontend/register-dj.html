@@ -25,7 +25,7 @@
 
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Avatar</label>
-                        <input type="file" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
+                        <input type="file" id="avatarFile" accept="image/*" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
 
                     <div>
@@ -190,6 +190,24 @@
                 localStorage.setItem('username', data.username);
                 localStorage.setItem('role', data.role);
                 localStorage.setItem('user_logged_in', 'true');
+
+                const avatarFile = document.getElementById('avatarFile').files[0];
+                if (avatarFile) {
+                    const formData = new FormData();
+                    formData.append('file', avatarFile);
+                    try {
+                        const uploadRes = await fetch('http://localhost:8080/api/izvodac/avatar', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + data.token },
+                            body: formData
+                        });
+                        if (!uploadRes.ok) {
+                            console.error('Avatar upload failed:', uploadRes.status);
+                        }
+                    } catch (e) {
+                        console.error('Avatar upload error:', e);
+                    }
+                }
 
                 window.location.href = 'index.html';
             } catch (err) {

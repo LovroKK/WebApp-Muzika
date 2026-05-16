@@ -38,6 +38,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth", "/api/auth/**").permitAll()
                 .requestMatchers("/api/equipment", "/api/equipment/**").permitAll()
                 .requestMatchers("/api/djs", "/api/djs/**").permitAll()
+                .requestMatchers(
+                    "/api/izvodac/avatar/**",
+                    "/api/business/avatar/**",
+                    "/api/business/slike/**"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

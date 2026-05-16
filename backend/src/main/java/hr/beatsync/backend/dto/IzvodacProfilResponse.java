@@ -24,7 +24,7 @@ public class IzvodacProfilResponse {
     public static IzvodacProfilResponse from(IzvodacKorisnik i) {
         IzvodacProfilResponse r = new IzvodacProfilResponse();
         r.setUsernameIzvodac(i.getUsernameIzvodac());
-        r.setLogoAvatar(i.getLogoAvatar());
+        r.setLogoAvatar(i.getLogoAvatar() != null ? "/api/izvodac/avatar/" + i.getUsernameIzvodac() : null);
         r.setIme(i.getIme());
         r.setPrezime(i.getPrezime());
         r.setEmail(i.getEmail());

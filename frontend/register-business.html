@@ -25,7 +25,7 @@
 
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Logo/Avatar</label>
-                        <input type="file" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
+                        <input type="file" id="logoFile" accept="image/*" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
 
                     <div class="md:col-span-2">
@@ -45,7 +45,7 @@
 
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Slike prostora</label>
-                        <input type="file" multiple class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
+                        <input type="file" id="slikeFiles" accept="image/*" multiple class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3">
                     </div>
 
                     <div class="md:col-span-2">
@@ -55,7 +55,7 @@
 
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium mb-2">Tko je ovdje radio (5 najboljih):</label>
-                        <textarea placeholder="Navedite 5 najboljih DJ-eva koji su nastupali u vašem klubu" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></textarea>
+                        <textarea id="najboljiIzvodaci" placeholder="Navedite 5 najboljih DJ-eva koji su nastupali u vašem klubu" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></textarea>
                     </div>
 
                     <div>
@@ -104,7 +104,9 @@
                 lozinka: document.getElementById('lozinka').value,
                 lokacija: document.getElementById('lokacija').value.trim() || null,
                 opis: document.getElementById('opis').value.trim() || null,
-                brojTelefona: document.getElementById('brojTelefona').value.trim() || null
+                brojTelefona: document.getElementById('brojTelefona').value.trim() || null,
+                residentDjUsername: document.getElementById('residentDJ').value.trim() || null,
+                najboljiIzvodaci: document.getElementById('najboljiIzvodaci').value.trim() || null
             };
 
             try {
@@ -124,6 +126,46 @@
                 localStorage.setItem('username', data.username);
                 localStorage.setItem('role', data.role);
                 localStorage.setItem('user_logged_in', 'true');
+
+                const token = data.token;
+
+                // Upload logo
+                const logoFile = document.getElementById('logoFile').files[0];
+                if (logoFile) {
+                    const formData = new FormData();
+                    formData.append('file', logoFile);
+                    try {
+                        const uploadRes = await fetch('http://localhost:8080/api/business/avatar', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + token },
+                            body: formData
+                        });
+                        if (!uploadRes.ok) {
+                            console.error('Logo upload failed:', uploadRes.status);
+                        }
+                    } catch (e) {
+                        console.error('Logo upload error:', e);
+                    }
+                }
+
+                // Upload slike prostora
+                const slikeFiles = document.getElementById('slikeFiles').files;
+                for (const file of slikeFiles) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    try {
+                        const uploadRes = await fetch('http://localhost:8080/api/business/slike', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + token },
+                            body: formData
+                        });
+                        if (!uploadRes.ok) {
+                            console.error('Slika upload failed:', uploadRes.status);
+                        }
+                    } catch (e) {
+                        console.error('Slika upload error:', e);
+                    }
+                }
 
                 window.location.href = 'index.html';
             } catch (err) {

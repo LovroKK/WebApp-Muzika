@@ -18,8 +18,9 @@ public class BusinessKorisnik {
     @Column(name = "username_business", length = 50)
     private String usernameBusiness;
 
-    @Column(name = "logo_avatar")
-    private String logoAvatar;
+    @Lob
+    @Column(name = "logo_avatar", columnDefinition = "LONGBLOB")
+    private byte[] logoAvatar;
 
     @Column(name = "naziv_kluba", nullable = false, length = 255)
     private String nazivKluba;

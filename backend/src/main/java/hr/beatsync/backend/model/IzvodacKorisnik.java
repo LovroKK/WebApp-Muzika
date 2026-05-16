@@ -19,8 +19,9 @@ public class IzvodacKorisnik {
     @Column(name = "username_izvodac", length = 50)
     private String usernameIzvodac;
 
-    @Column(name = "logo_avatar")
-    private String logoAvatar;
+    @Lob
+    @Column(name = "logo_avatar", columnDefinition = "LONGBLOB")
+    private byte[] logoAvatar;
 
     @Column(name = "ime", nullable = false, length = 100)
     private String ime;

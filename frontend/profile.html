@@ -23,6 +23,11 @@
                         <img id="avatarImg" src="https://ui-avatars.com/api/?background=7c3aed&color=fff&size=128" alt="Avatar" class="w-32 h-32 rounded-full mx-auto mb-4">
                         <h2 id="displayIme" class="text-xl font-semibold mb-2">—</h2>
                         <p id="displayUsername" class="text-gray-400 mb-4">—</p>
+                        <input type="file" id="avatarFileInput" accept="image/*" class="hidden">
+                        <button id="avatarUploadBtn" onclick="document.getElementById('avatarFileInput').click()" class="hidden w-full bg-gray-600 hover:bg-gray-500 py-2 rounded-lg font-medium text-sm mb-2">
+                            Promijeni avatar
+                        </button>
+                        <p id="avatarUploadStatus" class="text-xs text-center mb-2 hidden"></p>
                         <button id="urediBtn" onclick="openEditModal()" class="hidden w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium text-sm">
                             Uredi Profil
                         </button>
@@ -168,12 +173,13 @@
                 }
 
                 if (p.logoAvatar) {
-                    document.getElementById('avatarImg').src = p.logoAvatar;
+                    document.getElementById('avatarImg').src = 'http://localhost:8080' + p.logoAvatar;
                 } else {
                     document.getElementById('avatarImg').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.ime + '+' + p.prezime) + '&background=7c3aed&color=fff&size=128';
                 }
 
                 document.getElementById('urediBtn').classList.remove('hidden');
+                document.getElementById('avatarUploadBtn').classList.remove('hidden');
                 window._profil = p;
                 ucitajFavoriteProfil();
             } catch {
@@ -272,6 +278,38 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Spremi';
+            }
+        });
+
+        document.getElementById('avatarFileInput').addEventListener('change', async function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById('avatarUploadStatus');
+            statusEl.textContent = 'Učitavanje...';
+            statusEl.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('http://localhost:8080/api/izvodac/avatar', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Greška: ' + res.status);
+                }
+
+                statusEl.textContent = 'Avatar uspješno promijenjen!';
+                document.getElementById('avatarImg').src = 'http://localhost:8080/api/izvodac/avatar/' + window._profil.usernameIzvodac + '?t=' + Date.now();
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+            } catch (err) {
+                console.error('Avatar upload error:', err);
+                statusEl.textContent = 'Greška: ' + (err.message || 'Upload nije uspio');
             }
         });
 

@@ -20,8 +20,9 @@ public class SlikeProstora {
     @JoinColumn(name = "username_business", nullable = false)
     private BusinessKorisnik businessSlike;
 
-    @Column(name = "slika_url", nullable = false, length = 255)
-    private String slikaUrl;
+    @Lob
+    @Column(name = "slika_data", nullable = false, columnDefinition = "LONGBLOB")
+    private byte[] slikaData;
 
     @Column(name = "opis_slike", length = 255)
     private String opisSlike;
