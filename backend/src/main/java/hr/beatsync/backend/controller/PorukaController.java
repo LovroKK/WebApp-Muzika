@@ -189,9 +189,26 @@ public class PorukaController {
                 return ResponseEntity.ok(buildRazgovoriResponse(razgovori, true));
             }
         } else {
-            // IZVODAC vidi samo razgovore
+            // IZVODAC vidi razgovore + odbijanja (SYSTEM_NOTIFICATION od BUSINESS bez CHAT poruka)
             List<Poruka> razgovori = porukaRepo.findRazgovoriForIzvodac(username);
-            return ResponseEntity.ok(buildRazgovoriResponse(razgovori, false));
+            List<Poruka> odbijanja = porukaRepo.findOdbijanjaForIzvodac(username);
+
+            // Spoji: razgovori imaju prednost (ako ista rezervacija ima i CHAT i odbijanje, CHAT pobijedi)
+            java.util.Set<Integer> rezIdChatSet = razgovori.stream()
+                    .map(Poruka::getIdRezervacije)
+                    .collect(java.util.stream.Collectors.toSet());
+            List<Poruka> odbijanjaFiltered = odbijanja.stream()
+                    .filter(p -> !rezIdChatSet.contains(p.getIdRezervacije()))
+                    .toList();
+
+            List<Map<String, Object>> rezultat = new java.util.ArrayList<>(buildRazgovoriResponse(razgovori, false));
+            rezultat.addAll(buildOdbijanjaResponse(odbijanjaFiltered));
+            rezultat.sort((a, b) -> {
+                java.time.LocalDateTime ta = (java.time.LocalDateTime) a.get("timestamp");
+                java.time.LocalDateTime tb = (java.time.LocalDateTime) b.get("timestamp");
+                return tb.compareTo(ta);
+            });
+            return ResponseEntity.ok(rezultat);
         }
     }
 
@@ -212,6 +229,32 @@ public class PorukaController {
     private boolean isBusiness(Authentication auth) {
         return auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_BUSINESS"));
+    }
+
+    private List<Map<String, Object>> buildOdbijanjaResponse(List<Poruka> poruke) {
+        return poruke.stream().map(p -> {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("idRezervacije", p.getIdRezervacije());
+            item.put("izvodacUsername", p.getIzvodacPoruka().getUsernameIzvodac());
+            item.put("izvodacIme", p.getIzvodacPoruka().getIme());
+            item.put("izvodacPrezime", p.getIzvodacPoruka().getPrezime());
+            item.put("businessUsername", p.getBusinessPoruka().getUsernameBusiness());
+            item.put("nazivKluba", p.getBusinessPoruka().getNazivKluba());
+            item.put("lastMessage", p.getSadrzajPoruke());
+            item.put("timestamp", p.getTimestampPoruke());
+            item.put("readStatus", p.getReadStatus());
+            item.put("messageType", "SYSTEM_NOTIFICATION");
+            item.put("statusRezervacije", "CANCELLED");
+            if (p.getIdRezervacije() != null) {
+                rezervacijaRepo.findByIdRezervacije(p.getIdRezervacije()).ifPresent(r -> {
+                    if (r.getJobOffer() != null) {
+                        item.put("nazivPonude", r.getJobOffer().getNazivPonude());
+                        item.put("datumPonude", r.getJobOffer().getDatum());
+                    }
+                });
+            }
+            return item;
+        }).toList();
     }
 
     private List<Map<String, Object>> buildRazgovoriResponse(List<Poruka> poruke, boolean isBusiness) {

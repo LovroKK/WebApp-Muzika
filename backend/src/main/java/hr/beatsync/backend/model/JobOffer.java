@@ -55,6 +55,10 @@ public class JobOffer {
     @Column(name = "ostalo_oprema", length = 500)
     private String ostaloOprema;
 
+    @Column(name = "popunjen", nullable = false)
+    @Builder.Default
+    private Boolean popunjen = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username_business", nullable = false)
     private BusinessKorisnik businessPonuda;

@@ -2,7 +2,11 @@ package hr.beatsync.backend.controller;
 
 import hr.beatsync.backend.dto.RezervacijaResponse;
 import hr.beatsync.backend.enums.StatusRezervacije;
+import hr.beatsync.backend.enums.VrstaPosiljatelja;
+import hr.beatsync.backend.model.Poruka;
 import hr.beatsync.backend.model.Rezervacija;
+import hr.beatsync.backend.repository.JobOfferRepository;
+import hr.beatsync.backend.repository.PorukaRepository;
 import hr.beatsync.backend.repository.RezervacijaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +26,15 @@ import java.util.Map;
 public class RezervacijaController {
 
     private final RezervacijaRepository rezervacijaRepo;
+    private final JobOfferRepository jobOfferRepo;
+    private final PorukaRepository porukaRepo;
 
-    public RezervacijaController(RezervacijaRepository rezervacijaRepo) {
+    public RezervacijaController(RezervacijaRepository rezervacijaRepo,
+                                 JobOfferRepository jobOfferRepo,
+                                 PorukaRepository porukaRepo) {
         this.rezervacijaRepo = rezervacijaRepo;
+        this.jobOfferRepo = jobOfferRepo;
+        this.porukaRepo = porukaRepo;
     }
 
     @GetMapping
@@ -78,6 +89,11 @@ public class RezervacijaController {
             if (Boolean.TRUE.equals(rez.getPotvrdaBusiness())) {
                 rez.setStatusRezervacije(StatusRezervacije.ACCEPTED);
                 rez.setPotvrdaRezervacije(true);
+                // Označi job offer kao popunjen — nestaje s liste ponuda
+                if (rez.getJobOffer() != null) {
+                    rez.getJobOffer().setPopunjen(true);
+                    jobOfferRepo.save(rez.getJobOffer());
+                }
             }
         }
 
@@ -101,6 +117,32 @@ public class RezervacijaController {
 
         rez.setStatusRezervacije(StatusRezervacije.CANCELLED);
         rezervacijaRepo.save(rez);
+
+        // Označi sve nepročitane poruke te rezervacije kao pročitane za stranu koja odbija
+        List<Poruka> neprocitane = isBusiness
+                ? porukaRepo.findUnreadByRezervacijaForBusiness(rez.getIdRezervacije())
+                : porukaRepo.findUnreadByRezervacijaForIzvodac(rez.getIdRezervacije());
+        if (!neprocitane.isEmpty()) {
+            neprocitane.forEach(p -> p.setReadStatus(true));
+            porukaRepo.saveAll(neprocitane);
+        }
+
+        // Pošalji SYSTEM_NOTIFICATION izvođaču kada BUSINESS odbija
+        if (isBusiness) {
+            String nazivPonude = rez.getJobOffer() != null ? rez.getJobOffer().getNazivPonude() : "ponudu";
+            Poruka notif = Poruka.builder()
+                    .sadrzajPoruke("Vaša prijava za ponudu \"" + nazivPonude + "\" je odbijena.")
+                    .posiljatelj(VrstaPosiljatelja.BUSINESS)
+                    .izvodacPoruka(rez.getIzvodacRezervacija())
+                    .businessPoruka(rez.getBusinessRezervacija())
+                    .idRezervacije(rez.getIdRezervacije())
+                    .messageType("SYSTEM_NOTIFICATION")
+                    .readStatus(false)
+                    .timestampPoruke(LocalDateTime.now())
+                    .build();
+            porukaRepo.save(notif);
+        }
+
         return ResponseEntity.ok(RezervacijaResponse.from(rez));
     }
 

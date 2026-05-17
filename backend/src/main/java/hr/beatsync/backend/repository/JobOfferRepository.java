@@ -12,4 +12,5 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, Integer> {
     Optional<JobOffer> findByIdPonude(Integer idPonude);
     Optional<JobOffer> findByNazivPonude(String nazivPonude);
     List<JobOffer> findByBusinessPonuda_UsernameBusiness(String usernameBusiness);
+    List<JobOffer> findByPopunjenFalse();
 }

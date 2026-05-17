@@ -199,9 +199,10 @@ class BeatSyncNavbar extends HTMLElement {
                         <a href="djs.html" class="navbar-link text-gray-300 hover:text-purple-400">DJ-evi</a>
                         <a href="equipment.html" class="navbar-link text-gray-300 hover:text-purple-400">Oprema</a>
                         <a href="job-offers.html" class="navbar-link text-gray-300 hover:text-purple-400">Ponude Poslova</a>
+                        <a href="moji-poslovi.html" id="mojiPosloviLink" class="navbar-link text-gray-300 hover:text-purple-400 hidden">Moji Poslovi</a>
                         <a href="how-it-works.html" class="navbar-link text-gray-300 hover:text-purple-400">Kako funkcionira</a>
-                        <a href="pricing.html" class="navbar-link text-gray-300 hover:text-purple-400">Cijene</a>
-                        <a href="${profileHref}" data-profile-link class="navbar-link text-gray-300 hover:text-purple-400">Profil</a>
+                        <a href="pricing.html" class="navbar-link text-gray-300 hover:text-purple-400" style="display:none">Cijene</a>
+                        <a href="${profileHref}" data-profile-link class="navbar-link text-gray-300 hover:text-purple-400" style="display:none">Profil</a>
                     </div>
                     <div class="flex items-center space-x-4">
                         <a href="auth.html" id="loginBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-medium transition-colors">
@@ -232,9 +233,10 @@ class BeatSyncNavbar extends HTMLElement {
                     <a href="djs.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">DJ-evi</a>
                     <a href="equipment.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Oprema</a>
                     <a href="job-offers.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Ponude Poslova</a>
+                    <a href="moji-poslovi.html" id="mojiPosloviLinkMobile" class="block px-2 py-1 text-gray-300 hover:text-purple-400 hidden">Moji Poslovi</a>
                     <a href="how-it-works.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Kako funkcionira</a>
-                    <a href="pricing.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Cijene</a>
-                    <a href="${profileHref}" data-profile-link class="block px-2 py-1 text-gray-300 hover:text-purple-400">Profil</a>
+                    <a href="pricing.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400" style="display:none">Cijene</a>
+                    <a href="${profileHref}" data-profile-link class="block px-2 py-1 text-gray-300 hover:text-purple-400" style="display:none">Profil</a>
                 </div>
             </nav>
 
@@ -346,7 +348,7 @@ class BeatSyncNavbar extends HTMLElement {
         this._loadInbox();
     }
 
-    _showInbox() {
+    async _showInbox() {
         this._stopPolling();
         this.querySelector('#chatConvView').style.display = 'none';
         this.querySelector('#chatInboxView').style.display = '';
@@ -355,7 +357,7 @@ class BeatSyncNavbar extends HTMLElement {
             this.querySelector('#chatTabBar').style.display = 'flex';
         }
         this.querySelector('#chatPanelTitle').textContent = 'Poruke';
-        this._loadInbox();
+        await this._loadInbox();
     }
 
     async _loadInbox() {
@@ -434,7 +436,7 @@ class BeatSyncNavbar extends HTMLElement {
                     method: 'PUT',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
-                this._loadInbox();
+                await this._loadInbox();
                 this.ucitajBadge();
             });
         });
@@ -557,7 +559,7 @@ class BeatSyncNavbar extends HTMLElement {
                 await fetch(`http://localhost:8080/api/rezervacije/${rez.idRezervacije}/otkazi`, {
                     method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
                 });
-                this._showInbox();
+                await this._showInbox();
                 this.ucitajBadge();
             });
             actionsEl.appendChild(btnOdbij);
@@ -660,10 +662,15 @@ class BeatSyncNavbar extends HTMLElement {
 
         this.updateProfileLinks();
 
+        const mojiPosloviLink = this.querySelector('#mojiPosloviLink');
+        const mojiPosloviLinkMobile = this.querySelector('#mojiPosloviLinkMobile');
+
         if (isLoggedIn) {
             loginBtn.classList.add('hidden');
             profileDropdown.classList.remove('hidden');
             chatBtn.classList.remove('hidden');
+            if (mojiPosloviLink) mojiPosloviLink.classList.remove('hidden');
+            if (mojiPosloviLinkMobile) mojiPosloviLinkMobile.classList.remove('hidden');
             this.ucitajBadge();
             // Badge polling svakih 30s
             if (!this._badgeInterval) {
@@ -673,6 +680,8 @@ class BeatSyncNavbar extends HTMLElement {
             loginBtn.classList.remove('hidden');
             profileDropdown.classList.add('hidden');
             chatBtn.classList.add('hidden');
+            if (mojiPosloviLink) mojiPosloviLink.classList.add('hidden');
+            if (mojiPosloviLinkMobile) mojiPosloviLinkMobile.classList.add('hidden');
             if (this._badgeInterval) {
                 clearInterval(this._badgeInterval);
                 this._badgeInterval = null;

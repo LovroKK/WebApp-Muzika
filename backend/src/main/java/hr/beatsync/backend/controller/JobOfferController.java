@@ -90,10 +90,16 @@ public class JobOfferController {
                     .toList();
             return ResponseEntity.ok(offers);
         } else {
-            List<JobOfferResponse> offers = jobOfferRepo.findAll()
+            List<StatusRezervacije> aktivni = List.of(
+                    StatusRezervacije.REQUESTED,
+                    StatusRezervacije.ACCEPTED,
+                    StatusRezervacije.IN_PROGRESS
+            );
+            List<JobOfferResponse> offers = jobOfferRepo.findByPopunjenFalse()
                     .stream()
                     .map(o -> toResponse(o, rezervacijaRepo
-                            .existsByJobOffer_IdPonudeAndIzvodacRezervacija_UsernameIzvodac(o.getIdPonude(), username)))
+                            .existsByJobOffer_IdPonudeAndIzvodacRezervacija_UsernameIzvodacAndStatusRezervacijeIn(
+                                    o.getIdPonude(), username, aktivni)))
                     .toList();
             return ResponseEntity.ok(offers);
         }
@@ -112,7 +118,12 @@ public class JobOfferController {
         JobOffer offer = jobOfferRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ponuda ne postoji"));
 
-        if (rezervacijaRepo.existsByJobOffer_IdPonudeAndIzvodacRezervacija_UsernameIzvodac(id, username)) {
+        List<StatusRezervacije> aktivni = List.of(
+                StatusRezervacije.REQUESTED,
+                StatusRezervacije.ACCEPTED,
+                StatusRezervacije.IN_PROGRESS
+        );
+        if (rezervacijaRepo.existsByJobOffer_IdPonudeAndIzvodacRezervacija_UsernameIzvodacAndStatusRezervacijeIn(id, username, aktivni)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Već ste prijavljeni na ovu ponudu");
         }
 

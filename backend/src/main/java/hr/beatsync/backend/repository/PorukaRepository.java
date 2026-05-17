@@ -28,8 +28,20 @@ public interface PorukaRepository extends JpaRepository<Poruka, Integer> {
     @Query("SELECT COUNT(p) FROM Poruka p WHERE p.izvodacPoruka.usernameIzvodac = :username AND p.readStatus = false AND p.posiljatelj = hr.beatsync.backend.enums.VrstaPosiljatelja.BUSINESS")
     long countUnreadForIzvodac(@Param("username") String username);
 
-    // Zahtjevi tab: SYSTEM_NOTIFICATION za business gdje za tu rezervaciju nema CHAT poruka
-    @Query("SELECT p FROM Poruka p WHERE p.businessPoruka.usernameBusiness = :username AND p.messageType = 'SYSTEM_NOTIFICATION' AND NOT EXISTS (SELECT p2 FROM Poruka p2 WHERE p2.idRezervacije = p.idRezervacije AND p2.messageType = 'CHAT') ORDER BY p.timestampPoruke DESC")
+    // Zahtjevi tab: jedna SYSTEM_NOTIFICATION po rezervaciji (prijava izvođača) gdje nema CHAT poruka i rezervacija još nije odbijena/prihvaćena
+    @Query("""
+        SELECT p FROM Poruka p
+        JOIN Rezervacija r ON r.idRezervacije = p.idRezervacije
+        WHERE p.businessPoruka.usernameBusiness = :username
+          AND p.messageType = 'SYSTEM_NOTIFICATION'
+          AND p.posiljatelj = hr.beatsync.backend.enums.VrstaPosiljatelja.IZVODAC
+          AND r.statusRezervacije = hr.beatsync.backend.enums.StatusRezervacije.REQUESTED
+          AND NOT EXISTS (
+              SELECT p2 FROM Poruka p2
+              WHERE p2.idRezervacije = p.idRezervacije AND p2.messageType = 'CHAT'
+          )
+        ORDER BY p.timestampPoruke DESC
+        """)
     List<Poruka> findZahtjeviForBusiness(@Param("username") String username);
 
     // Razgovori tab: zadnja CHAT poruka po rezervaciji za business
@@ -53,4 +65,8 @@ public interface PorukaRepository extends JpaRepository<Poruka, Integer> {
     // Mark all messages as read for a specific conversation for IZVODAC
     @Query("SELECT p FROM Poruka p WHERE p.idRezervacije = :rezId AND p.posiljatelj = hr.beatsync.backend.enums.VrstaPosiljatelja.BUSINESS AND p.readStatus = false")
     List<Poruka> findUnreadByRezervacijaForIzvodac(@Param("rezId") Integer rezId);
+
+    // Odbijanja za IZVODAC: SYSTEM_NOTIFICATION od BUSINESS (bez CHAT poruka — odbijeno iz Zahtjevi taba)
+    @Query("SELECT p FROM Poruka p WHERE p.izvodacPoruka.usernameIzvodac = :username AND p.messageType = 'SYSTEM_NOTIFICATION' AND p.posiljatelj = hr.beatsync.backend.enums.VrstaPosiljatelja.BUSINESS ORDER BY p.timestampPoruke DESC")
+    List<Poruka> findOdbijanjaForIzvodac(@Param("username") String username);
 }
