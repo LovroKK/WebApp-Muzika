@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plaćanje otkazano - BeatSync Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/navbar.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <beat-sync-navbar></beat-sync-navbar>
+
+    <main class="container mx-auto px-4 py-16 max-w-xl">
+        <div class="bg-gray-800 rounded-lg p-8 text-center border border-gray-700">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-600/20 text-red-400 rounded-full mb-4">
+                <i data-feather="x" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-2xl font-bold mb-2">Plaćanje otkazano</h1>
+            <p class="text-gray-400 text-sm mb-6">Niste dovršili Stripe Checkout. Možete pokušati ponovno iz rezervacija.</p>
+            <a href="bookings.html" class="inline-block bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium">
+                Natrag na rezervacije
+            </a>
+        </div>
+    </main>
+
+    <script>feather.replace();</script>
+</body>
+</html>

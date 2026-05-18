@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="components/navbar.js"></script>
+    <script src="components/star-rating.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
     <beat-sync-navbar></beat-sync-navbar>
@@ -22,7 +23,8 @@
                     <div class="bg-gray-700 rounded-lg p-6 text-center">
                         <img id="avatarImg" src="https://ui-avatars.com/api/?background=7c3aed&color=fff&size=128" alt="Avatar" class="w-32 h-32 rounded-full mx-auto mb-4">
                         <h2 id="displayIme" class="text-xl font-semibold mb-2">—</h2>
-                        <p id="displayUsername" class="text-gray-400 mb-4">—</p>
+                        <p id="displayUsername" class="text-gray-400 mb-2">—</p>
+                        <div id="displayAvgStars" class="mb-4 text-center"></div>
                         <input type="file" id="avatarFileInput" accept="image/*" class="hidden">
                         <button id="avatarUploadBtn" onclick="document.getElementById('avatarFileInput').click()" class="hidden w-full bg-gray-600 hover:bg-gray-500 py-2 rounded-lg font-medium text-sm mb-2">
                             Promijeni avatar
@@ -70,6 +72,14 @@
                             <a href="favorites.html" class="text-purple-400 text-sm hover:underline">Svi favoriti →</a>
                         </div>
                         <div id="favoritiProfil" class="text-sm text-gray-400">Učitavanje...</div>
+                    </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-semibold">Recenzije</h3>
+                            <div id="recenzijeSummary" class="text-sm"></div>
+                        </div>
+                        <div id="recenzijeLista" class="space-y-3 text-sm text-gray-300">Učitavanje...</div>
                     </div>
                 </div>
             </div>
@@ -181,10 +191,53 @@
                 document.getElementById('urediBtn').classList.remove('hidden');
                 document.getElementById('avatarUploadBtn').classList.remove('hidden');
                 window._profil = p;
+
+                document.getElementById('displayAvgStars').innerHTML =
+                    window.renderStars(p.avgOcjena, p.brojRecenzija);
+
                 ucitajFavoriteProfil();
+                ucitajRecenzije(p.usernameIzvodac, p.avgOcjena, p.brojRecenzija);
             } catch {
                 // token nije valjan ili je istekao — gumb ostaje sakriven
             }
+        }
+
+        async function ucitajRecenzije(username, avg, count) {
+            const lista = document.getElementById('recenzijeLista');
+            const summary = document.getElementById('recenzijeSummary');
+
+            summary.innerHTML = window.renderStars(avg, count);
+
+            try {
+                const res = await fetch('http://localhost:8080/api/recenzije/dj/' + encodeURIComponent(username));
+                if (!res.ok) throw new Error();
+                const arr = await res.json();
+                if (arr.length === 0) {
+                    lista.innerHTML = '<p class="text-gray-400">Još nema recenzija.</p>';
+                    return;
+                }
+                lista.innerHTML = arr.map(r => {
+                    const datum = r.datumRecenzije ? new Date(r.datumRecenzije).toLocaleDateString('hr-HR') : '';
+                    const klub = r.nazivKluba ? r.nazivKluba : '@' + (r.businessUsername || '');
+                    const komentar = r.komentar ? `<p class="text-gray-300 mt-1">${escapeHtml(r.komentar)}</p>` : '';
+                    return `
+                        <div class="bg-gray-800 rounded-lg p-3 border border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <div>${window.renderStars(r.ocjena, 1, { showCount: false })}</div>
+                                <span class="text-xs text-gray-500">${datum}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">${escapeHtml(klub)}</p>
+                            ${komentar}
+                        </div>`;
+                }).join('');
+            } catch {
+                lista.innerHTML = '<p class="text-red-400">Greška pri učitavanju recenzija.</p>';
+            }
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
         async function ucitajFavoriteProfil() {

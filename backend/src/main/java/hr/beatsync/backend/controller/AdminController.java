@@ -1,6 +1,8 @@
 package hr.beatsync.backend.controller;
 
+import hr.beatsync.backend.dto.RecenzijaAdminResponse;
 import hr.beatsync.backend.enums.StatusRezervacije;
+import hr.beatsync.backend.enums.StatusValidacije;
 import hr.beatsync.backend.model.BusinessKorisnik;
 import hr.beatsync.backend.model.IzvodacKorisnik;
 import hr.beatsync.backend.model.Poruka;
@@ -9,12 +11,15 @@ import hr.beatsync.backend.repository.BusinessKorisnikRepository;
 import hr.beatsync.backend.repository.IzvodacKorisnikRepository;
 import hr.beatsync.backend.repository.PorukaRepository;
 import hr.beatsync.backend.repository.RezervacijaRepository;
+import hr.beatsync.backend.service.RecenzijaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,15 +34,18 @@ public class AdminController {
     private final BusinessKorisnikRepository businessRepo;
     private final PorukaRepository porukaRepo;
     private final RezervacijaRepository rezervacijaRepo;
+    private final RecenzijaService recenzijaService;
 
     public AdminController(IzvodacKorisnikRepository izvodacRepo,
                            BusinessKorisnikRepository businessRepo,
                            PorukaRepository porukaRepo,
-                           RezervacijaRepository rezervacijaRepo) {
+                           RezervacijaRepository rezervacijaRepo,
+                           RecenzijaService recenzijaService) {
         this.izvodacRepo = izvodacRepo;
         this.businessRepo = businessRepo;
         this.porukaRepo = porukaRepo;
         this.rezervacijaRepo = rezervacijaRepo;
+        this.recenzijaService = recenzijaService;
     }
 
     @GetMapping("/stats")
@@ -212,5 +220,42 @@ public class AdminController {
         response.put("total", totalFiltered);
         response.put("currentPage", page);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/recenzije")
+    public ResponseEntity<List<RecenzijaAdminResponse>> getReviews(
+            @RequestParam(required = false) String status) {
+        StatusValidacije filter = null;
+        if (status != null && !status.isBlank()) {
+            try {
+                filter = StatusValidacije.valueOf(status);
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nepoznati status: " + status);
+            }
+        }
+        return ResponseEntity.ok(recenzijaService.listAllForAdmin(filter));
+    }
+
+    @PutMapping("/recenzije/{id}/status")
+    public ResponseEntity<RecenzijaAdminResponse> changeReviewStatus(
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> body) {
+        String status = body.get("status");
+        if (status == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Polje 'status' je obavezno");
+        }
+        StatusValidacije noviStatus;
+        try {
+            noviStatus = StatusValidacije.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nepoznati status: " + status);
+        }
+        return ResponseEntity.ok(recenzijaService.changeStatus(id, noviStatus));
+    }
+
+    @DeleteMapping("/recenzije/{id}")
+    public ResponseEntity<Void> deleteReview(@PathVariable Integer id) {
+        recenzijaService.deleteReview(id);
+        return ResponseEntity.noContent().build();
     }
 }

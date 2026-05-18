@@ -4,6 +4,9 @@ import hr.beatsync.backend.dto.IzvodacProfilResponse;
 import hr.beatsync.backend.dto.UpdateIzvodacRequest;
 import hr.beatsync.backend.model.IzvodacKorisnik;
 import hr.beatsync.backend.repository.IzvodacKorisnikRepository;
+import hr.beatsync.backend.repository.RecenzijaRepository;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,9 +24,12 @@ import java.util.Map;
 public class IzvodacController {
 
     private final IzvodacKorisnikRepository izvodacRepo;
+    private final RecenzijaRepository recenzijaRepo;
 
-    public IzvodacController(IzvodacKorisnikRepository izvodacRepo) {
+    public IzvodacController(IzvodacKorisnikRepository izvodacRepo,
+                             RecenzijaRepository recenzijaRepo) {
         this.izvodacRepo = izvodacRepo;
+        this.recenzijaRepo = recenzijaRepo;
     }
 
     @GetMapping("/profil")
@@ -31,7 +37,9 @@ public class IzvodacController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         IzvodacKorisnik izvodac = izvodacRepo.findById(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Korisnik ne postoji"));
-        return ResponseEntity.ok(IzvodacProfilResponse.from(izvodac));
+        IzvodacProfilResponse dto = IzvodacProfilResponse.from(izvodac);
+        populateAggregate(dto, username);
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/profil")
@@ -52,7 +60,20 @@ public class IzvodacController {
         izvodac.setUkupnoGodinaIskustva(request.getUkupnoGodinaIskustva());
 
         izvodacRepo.save(izvodac);
-        return ResponseEntity.ok(IzvodacProfilResponse.from(izvodac));
+        IzvodacProfilResponse dto = IzvodacProfilResponse.from(izvodac);
+        populateAggregate(dto, username);
+        return ResponseEntity.ok(dto);
+    }
+
+    private void populateAggregate(IzvodacProfilResponse dto, String username) {
+        var agg = recenzijaRepo.findAggregateForIzvodac(username);
+        if (agg == null || agg.getCnt() == null || agg.getCnt() == 0) {
+            dto.setAvgOcjena(null);
+            dto.setBrojRecenzija(0L);
+        } else {
+            dto.setAvgOcjena(BigDecimal.valueOf(agg.getAvg()).setScale(1, RoundingMode.HALF_UP));
+            dto.setBrojRecenzija(agg.getCnt());
+        }
     }
 
     @PostMapping("/avatar")

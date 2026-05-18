@@ -20,6 +20,8 @@ public class IzvodacProfilResponse {
     private String prijasnjiPoslovi;
     private Integer radiOd;
     private Integer ukupnoGodinaIskustva;
+    private BigDecimal avgOcjena;
+    private Long brojRecenzija;
 
     public static IzvodacProfilResponse from(IzvodacKorisnik i) {
         IzvodacProfilResponse r = new IzvodacProfilResponse();

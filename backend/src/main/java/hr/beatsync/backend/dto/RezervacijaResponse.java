@@ -1,5 +1,6 @@
 package hr.beatsync.backend.dto;
 
+import hr.beatsync.backend.enums.StatusValidacije;
 import hr.beatsync.backend.model.Rezervacija;
 import lombok.Data;
 
@@ -29,6 +30,9 @@ public class RezervacijaResponse {
     private LocalDate datumPonude;
     private BigDecimal budzet;
 
+    private Boolean hasReview;
+    private String paymentStatus;
+
     public static RezervacijaResponse from(Rezervacija r) {
         RezervacijaResponse dto = new RezervacijaResponse();
         dto.setIdRezervacije(r.getIdRezervacije());
@@ -51,6 +55,9 @@ public class RezervacijaResponse {
             dto.setDatumPonude(r.getJobOffer().getDatum());
             dto.setBudzet(r.getJobOffer().getBudzet());
         }
+
+        dto.setHasReview(r.getRecenzija() != null
+                && r.getRecenzija().getStatusValidacije() != StatusValidacije.REJECTED);
 
         return dto;
     }

@@ -32,7 +32,7 @@ public class Recenzija {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_validacije", nullable = false)
-    private StatusValidacije statusValidacije = StatusValidacije.PENDING;
+    private StatusValidacije statusValidacije = StatusValidacije.APPROVED;
 
     @Column(name = "datum_recenzije", nullable = false)
     private LocalDateTime datumRecenzije = LocalDateTime.now();

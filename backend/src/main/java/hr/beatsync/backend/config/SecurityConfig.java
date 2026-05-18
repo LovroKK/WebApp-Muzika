@@ -35,6 +35,8 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/error").permitAll()
+                .requestMatchers("/api/placanja/webhook").permitAll()
                 .requestMatchers("/api/auth", "/api/auth/**").permitAll()
                 .requestMatchers("/api/equipment", "/api/equipment/**").permitAll()
                 .requestMatchers("/api/djs", "/api/djs/**").permitAll()
@@ -43,6 +45,7 @@ public class SecurityConfig {
                     "/api/business/avatar/**",
                     "/api/business/slike/**"
                 ).permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/recenzije/dj/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

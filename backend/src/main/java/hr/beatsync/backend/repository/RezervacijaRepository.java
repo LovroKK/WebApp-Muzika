@@ -16,4 +16,5 @@ public interface RezervacijaRepository extends JpaRepository<Rezervacija, Intege
     List<Rezervacija> findByIzvodacRezervacija_UsernameIzvodac(String usernameIzvodac);
     List<Rezervacija> findByBusinessRezervacija_UsernameBusiness(String usernameBusiness);
     long countByJobOffer_IdPonudeAndStatusRezervacije(Integer idPonude, StatusRezervacije status);
+    List<Rezervacija> findByStatusRezervacije(StatusRezervacije status);
 }

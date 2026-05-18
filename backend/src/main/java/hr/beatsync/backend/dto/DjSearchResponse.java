@@ -16,6 +16,8 @@ public class DjSearchResponse {
     private BigDecimal cijenaPoSatu;
     private Integer ukupnoGodinaIskustva;
     private String linkMixtape;
+    private BigDecimal avgOcjena;
+    private Long brojRecenzija;
 
     public static DjSearchResponse from(IzvodacKorisnik i) {
         DjSearchResponse r = new DjSearchResponse();

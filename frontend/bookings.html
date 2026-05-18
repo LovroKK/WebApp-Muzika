@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="components/navbar.js"></script>
+    <script src="components/star-rating.js"></script>
+    <script src="components/review-form.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
     <beat-sync-navbar></beat-sync-navbar>
@@ -49,6 +51,8 @@
             ucitaj();
         }
 
+        window._rezervacijeCache = [];
+
         async function ucitaj() {
             try {
                 const res = await fetch('http://localhost:8080/api/rezervacije', {
@@ -56,12 +60,15 @@
                 });
                 if (!res.ok) throw new Error();
                 const lista = await res.json();
+                window._rezervacijeCache = lista;
 
                 if (lista.length === 0) {
+                    document.getElementById('lista').innerHTML = '';
                     document.getElementById('emptyState').classList.remove('hidden');
                     return;
                 }
 
+                document.getElementById('emptyState').classList.add('hidden');
                 document.getElementById('lista').innerHTML = lista.map(r => renderKartica(r)).join('');
                 feather.replace();
             } catch {
@@ -99,6 +106,20 @@
                 } else if (r.statusRezervacije === 'IN_PROGRESS') {
                     akcije = `
                         <button onclick="zavrsiRezervaciju(${r.idRezervacije}, this)" class="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded text-sm">Označi završenim</button>`;
+                } else if (r.statusRezervacije === 'COMPLETED') {
+                    if (r.paymentStatus !== 'PAID') {
+                        akcije = `<button onclick="plati(${r.idRezervacije}, this)" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm flex items-center gap-1">
+                            <i data-feather="credit-card" class="w-3 h-3"></i> Plati izvođača
+                        </button>`;
+                    } else if (r.hasReview) {
+                        akcije = `<span class="text-xs px-3 py-2 rounded bg-purple-900/40 text-purple-300 flex items-center gap-1">
+                            <i data-feather="check-circle" class="w-3 h-3"></i> Recenzija ostavljena
+                        </span>`;
+                    } else {
+                        akcije = `<button onclick="otvoriRecenziju(${r.idRezervacije})" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded text-sm flex items-center gap-1">
+                            <i data-feather="star" class="w-3 h-3"></i> Ostavi recenziju
+                        </button>`;
+                    }
                 }
             } else {
                 // IZVODAC
@@ -112,9 +133,10 @@
                 <div id="rez-${r.idRezervacije}" class="bg-gray-800 rounded-lg p-6 border border-gray-700">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="space-y-1">
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 flex-wrap">
                                 <h3 class="text-lg font-semibold">${r.nazivPonude || '—'}</h3>
                                 <span class="text-xs px-2 py-1 rounded ${status.cls}">${status.label}</span>
+                                ${renderPaymentBadge(r)}
                             </div>
                             <p class="text-sm text-gray-400">
                                 ${role === 'BUSINESS'
@@ -169,6 +191,57 @@
             } catch {
                 btn.disabled = false;
                 btn.textContent = 'Greška';
+            }
+        }
+
+        function otvoriRecenziju(idRezervacije) {
+            const rez = (window._rezervacijeCache || []).find(r => r.idRezervacije === idRezervacije);
+            if (!rez) return;
+            window.openReviewForm(rez, {
+                onSubmitted: function () { ucitaj(); }
+            });
+        }
+
+        function renderPaymentBadge(r) {
+            if (r.statusRezervacije !== 'COMPLETED' || !r.paymentStatus) return '';
+            const labels = {
+                PAID: { txt: 'Plaćeno', cls: 'bg-green-700/60 text-green-300' },
+                PENDING: { txt: 'Plaćanje u tijeku', cls: 'bg-yellow-700/60 text-yellow-300' },
+                FAILED: { txt: 'Plaćanje neuspješno', cls: 'bg-red-700/60 text-red-300' },
+                EXPIRED: { txt: 'Plaćanje isteklo', cls: 'bg-gray-700/60 text-gray-300' },
+                REFUNDED: { txt: 'Vraćeno', cls: 'bg-orange-700/60 text-orange-300' }
+            };
+            const l = labels[r.paymentStatus];
+            if (!l) return '';
+            return `<span class="text-xs px-2 py-1 rounded ${l.cls}">${l.txt}</span>`;
+        }
+
+        async function plati(id, btn) {
+            btn.disabled = true;
+            btn.textContent = 'Pripremam plaćanje...';
+            try {
+                const res = await fetch('http://localhost:8080/api/placanja/checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ idRezervacije: id })
+                });
+                if (!res.ok) {
+                    let msg = 'Greška pri pokretanju plaćanja.';
+                    try {
+                        const data = await res.json();
+                        if (data && (data.message || data.error)) msg = data.message || data.error;
+                    } catch (_) {}
+                    throw new Error(msg);
+                }
+                const data = await res.json();
+                window.location.href = data.checkoutUrl;
+            } catch (e) {
+                btn.disabled = false;
+                btn.textContent = 'Plati izvođača';
+                alert(e.message || 'Greška pri pokretanju plaćanja.');
             }
         }
     </script>

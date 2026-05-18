@@ -64,6 +64,13 @@
                         Rezervacije
                     </span>
                 </button>
+                <button class="tab-btn px-5 py-3 text-sm font-medium border-b-2 transition-colors"
+                    data-tab="recenzije" onclick="switchTab('recenzije')">
+                    <span class="flex items-center gap-2">
+                        <i data-feather="star" class="w-4 h-4"></i>
+                        Recenzije
+                    </span>
+                </button>
             </div>
         </div>
     </div>
@@ -227,6 +234,43 @@
             </div>
         </div>
 
+        <!-- TAB: Recenzije -->
+        <div id="tab-recenzije" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Moderacija recenzija</h2>
+                <select id="reviewStatusFilter" onchange="loadReviews()"
+                    class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500">
+                    <option value="">Svi statusi</option>
+                    <option value="APPROVED">APPROVED</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="REJECTED">REJECTED</option>
+                </select>
+            </div>
+
+            <div id="reviewsLoading" class="text-gray-400">Učitavam recenzije...</div>
+            <div id="reviewsContent" class="hidden">
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">ID</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">DJ</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Klub</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Ocjena</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Komentar</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Status</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Datum</th>
+                                <th class="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewsTable"></tbody>
+                    </table>
+                    <div id="reviewsEmpty" class="hidden text-center text-gray-400 py-8">Nema recenzija</div>
+                </div>
+                <p class="text-gray-400 text-sm mt-3" id="reviewsCount"></p>
+            </div>
+        </div>
+
     </main>
 
     <!-- Confirm dialog -->
@@ -283,6 +327,7 @@
             if (tab === 'korisnici') loadUsers('SVE');
             if (tab === 'poruke') loadMessages(0);
             if (tab === 'rezervacije') loadBookings(0);
+            if (tab === 'recenzije') loadReviews();
         };
 
         // --- STATS ---
@@ -506,6 +551,98 @@
             } catch (e) {
                 document.getElementById('bookingsLoading').textContent = 'Greška pri učitavanju.';
             }
+        };
+
+        // --- REVIEWS ---
+        window.loadReviews = async function() {
+            const status = document.getElementById('reviewStatusFilter').value;
+            document.getElementById('reviewsLoading').classList.remove('hidden');
+            document.getElementById('reviewsContent').classList.add('hidden');
+            try {
+                const path = status ? `/recenzije?status=${status}` : '/recenzije';
+                const res = await apiFetch(path);
+                const arr = await res.json();
+                const tbody = document.getElementById('reviewsTable');
+                const empty = document.getElementById('reviewsEmpty');
+                tbody.innerHTML = '';
+
+                if (arr.length === 0) {
+                    empty.classList.remove('hidden');
+                } else {
+                    empty.classList.add('hidden');
+                    arr.forEach(r => {
+                        const datum = r.datumRecenzije ? new Date(r.datumRecenzije).toLocaleString('hr-HR', { dateStyle: 'short', timeStyle: 'short' }) : '';
+                        const dj = `${escHtml(r.izvodacIme || '')} ${escHtml(r.izvodacPrezime || '')} (@${escHtml(r.usernameIzvodac)})`;
+                        const klub = `${escHtml(r.nazivKluba || '')} (@${escHtml(r.usernameBusiness)})`;
+                        const komentar = r.komentar
+                            ? (r.komentar.length > 80 ? r.komentar.substring(0, 80) + '…' : r.komentar)
+                            : '<span class="text-gray-500 italic">bez komentara</span>';
+                        const ocjenaTxt = r.ocjena ? Number(r.ocjena).toFixed(1) : '—';
+                        const statusCls = r.statusValidacije === 'APPROVED' ? 'text-green-400'
+                            : r.statusValidacije === 'REJECTED' ? 'text-red-400'
+                            : 'text-yellow-400';
+                        const btnApprove = r.statusValidacije !== 'APPROVED'
+                            ? `<button onclick="changeReviewStatus(${r.idRezervacije}, 'APPROVED')" class="text-green-400 hover:text-green-300 text-xs px-2" title="Odobri">✓</button>`
+                            : '';
+                        const btnReject = r.statusValidacije !== 'REJECTED'
+                            ? `<button onclick="changeReviewStatus(${r.idRezervacije}, 'REJECTED')" class="text-yellow-400 hover:text-yellow-300 text-xs px-2" title="Sakrij">⊘</button>`
+                            : '';
+                        tbody.innerHTML += `
+                            <tr class="border-t border-gray-700 hover:bg-gray-750">
+                                <td class="px-4 py-3 text-sm text-gray-400">#${r.idRezervacije}</td>
+                                <td class="px-4 py-3 text-sm text-purple-400">${dj}</td>
+                                <td class="px-4 py-3 text-sm text-blue-400">${klub}</td>
+                                <td class="px-4 py-3 text-sm font-semibold text-yellow-300">${ocjenaTxt} ★</td>
+                                <td class="px-4 py-3 text-sm text-gray-300 max-w-xs">${komentar}</td>
+                                <td class="px-4 py-3"><span class="text-xs font-semibold ${statusCls}">${r.statusValidacije}</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-400">${datum}</td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap">
+                                    ${btnApprove}
+                                    ${btnReject}
+                                    <button onclick="confirmDeleteReview(${r.idRezervacije})"
+                                        class="text-red-400 hover:text-red-300 text-xs px-2" title="Obriši">
+                                        <i data-feather="trash-2" class="w-4 h-4 inline"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
+                    });
+                    feather.replace();
+                }
+
+                document.getElementById('reviewsCount').textContent = `Ukupno: ${arr.length} recenzija`;
+                document.getElementById('reviewsLoading').classList.add('hidden');
+                document.getElementById('reviewsContent').classList.remove('hidden');
+            } catch (e) {
+                document.getElementById('reviewsLoading').textContent = 'Greška pri učitavanju.';
+            }
+        };
+
+        window.changeReviewStatus = async function(id, status) {
+            try {
+                await apiFetch(`/recenzije/${id}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status })
+                });
+                loadReviews();
+            } catch (e) {
+                alert('Greška pri promjeni statusa recenzije.');
+            }
+        };
+
+        window.confirmDeleteReview = function(id) {
+            document.getElementById('confirmTitle').textContent = 'Obriši recenziju?';
+            document.getElementById('confirmText').textContent =
+                `Sigurno želiš obrisati recenziju #${id}? Ova radnja se ne može poništiti.`;
+            document.getElementById('confirmDialog').classList.remove('hidden');
+            document.getElementById('confirmOkBtn').onclick = async () => {
+                closeConfirm();
+                try {
+                    await apiFetch(`/recenzije/${id}`, { method: 'DELETE' });
+                    loadReviews();
+                } catch (e) {
+                    alert('Greška pri brisanju recenzije.');
+                }
+            };
         };
 
         // --- Confirm dialog ---

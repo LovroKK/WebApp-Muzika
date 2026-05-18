@@ -6,6 +6,7 @@ import hr.beatsync.backend.enums.VrstaPosiljatelja;
 import hr.beatsync.backend.model.Poruka;
 import hr.beatsync.backend.model.Rezervacija;
 import hr.beatsync.backend.repository.JobOfferRepository;
+import hr.beatsync.backend.repository.PlacanjeRepository;
 import hr.beatsync.backend.repository.PorukaRepository;
 import hr.beatsync.backend.repository.RezervacijaRepository;
 import org.springframework.http.HttpStatus;
@@ -15,9 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -28,13 +27,23 @@ public class RezervacijaController {
     private final RezervacijaRepository rezervacijaRepo;
     private final JobOfferRepository jobOfferRepo;
     private final PorukaRepository porukaRepo;
+    private final PlacanjeRepository placanjeRepo;
 
     public RezervacijaController(RezervacijaRepository rezervacijaRepo,
                                  JobOfferRepository jobOfferRepo,
-                                 PorukaRepository porukaRepo) {
+                                 PorukaRepository porukaRepo,
+                                 PlacanjeRepository placanjeRepo) {
         this.rezervacijaRepo = rezervacijaRepo;
         this.jobOfferRepo = jobOfferRepo;
         this.porukaRepo = porukaRepo;
+        this.placanjeRepo = placanjeRepo;
+    }
+
+    private RezervacijaResponse toResponse(Rezervacija r) {
+        RezervacijaResponse dto = RezervacijaResponse.from(r);
+        placanjeRepo.findTopByRezervacija_IdRezervacijeOrderByDatumKreiranjaDesc(r.getIdRezervacije())
+                .ifPresent(p -> dto.setPaymentStatus(p.getStatusPlacanja().name()));
+        return dto;
     }
 
     @GetMapping
@@ -47,24 +56,7 @@ public class RezervacijaController {
                 ? rezervacijaRepo.findByBusinessRezervacija_UsernameBusiness(username)
                 : rezervacijaRepo.findByIzvodacRezervacija_UsernameIzvodac(username);
 
-        // Auto IN_PROGRESS: prebaci ACCEPTED rezervacije na datum eventa
-        LocalDate danas = LocalDate.now();
-        LocalTime sada = LocalTime.now();
-        boolean anyUpdated = false;
-        for (Rezervacija r : lista) {
-            if (r.getStatusRezervacije() == StatusRezervacije.ACCEPTED
-                    && r.getJobOffer() != null
-                    && !danas.isBefore(r.getJobOffer().getDatum())
-                    && !sada.isBefore(r.getJobOffer().getPocetak())) {
-                r.setStatusRezervacije(StatusRezervacije.IN_PROGRESS);
-                anyUpdated = true;
-            }
-        }
-        if (anyUpdated) {
-            rezervacijaRepo.saveAll(lista);
-        }
-
-        return ResponseEntity.ok(lista.stream().map(RezervacijaResponse::from).toList());
+        return ResponseEntity.ok(lista.stream().map(this::toResponse).toList());
     }
 
     // Potvrdi suradnju — oba korisnika
@@ -98,7 +90,7 @@ public class RezervacijaController {
         }
 
         rezervacijaRepo.save(rez);
-        return ResponseEntity.ok(RezervacijaResponse.from(rez));
+        return ResponseEntity.ok(toResponse(rez));
     }
 
     // Otkaži / odbij — oba korisnika mogu otkazati REQUESTED
@@ -143,7 +135,7 @@ public class RezervacijaController {
             porukaRepo.save(notif);
         }
 
-        return ResponseEntity.ok(RezervacijaResponse.from(rez));
+        return ResponseEntity.ok(toResponse(rez));
     }
 
     // Završi — samo BUSINESS, IN_PROGRESS → COMPLETED
@@ -167,7 +159,7 @@ public class RezervacijaController {
 
         rez.setStatusRezervacije(StatusRezervacije.COMPLETED);
         rezervacijaRepo.save(rez);
-        return ResponseEntity.ok(RezervacijaResponse.from(rez));
+        return ResponseEntity.ok(toResponse(rez));
     }
 
     // Stari endpoint — zadržan za kompatibilnost, ali ACCEPTED se sada radi kroz /potvrdi
@@ -204,7 +196,7 @@ public class RezervacijaController {
 
         rez.setStatusRezervacije(noviStatus);
         rezervacijaRepo.save(rez);
-        return ResponseEntity.ok(RezervacijaResponse.from(rez));
+        return ResponseEntity.ok(toResponse(rez));
     }
 
     private boolean isBusiness(Authentication auth) {
