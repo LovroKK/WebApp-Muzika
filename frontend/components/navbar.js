@@ -199,7 +199,7 @@ class BeatSyncNavbar extends HTMLElement {
                         <a href="djs.html" class="navbar-link text-gray-300 hover:text-purple-400">DJ-evi</a>
                         <a href="equipment.html" class="navbar-link text-gray-300 hover:text-purple-400">Oprema</a>
                         <a href="job-offers.html" class="navbar-link text-gray-300 hover:text-purple-400">Ponude Poslova</a>
-                        <a href="moji-poslovi.html" id="mojiPosloviLink" class="navbar-link text-gray-300 hover:text-purple-400 hidden">Moji Poslovi</a>
+                        <a href="bookings.html" id="rezervacijeLink" class="navbar-link text-gray-300 hover:text-purple-400 hidden">Rezervacije</a>
                         <a href="how-it-works.html" class="navbar-link text-gray-300 hover:text-purple-400">Kako funkcionira</a>
                         <a href="pricing.html" class="navbar-link text-gray-300 hover:text-purple-400" style="display:none">Cijene</a>
                         <a href="${profileHref}" data-profile-link class="navbar-link text-gray-300 hover:text-purple-400" style="display:none">Profil</a>
@@ -233,7 +233,7 @@ class BeatSyncNavbar extends HTMLElement {
                     <a href="djs.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">DJ-evi</a>
                     <a href="equipment.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Oprema</a>
                     <a href="job-offers.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Ponude Poslova</a>
-                    <a href="moji-poslovi.html" id="mojiPosloviLinkMobile" class="block px-2 py-1 text-gray-300 hover:text-purple-400 hidden">Moji Poslovi</a>
+                    <a href="bookings.html" id="rezervacijeLinkMobile" class="block px-2 py-1 text-gray-300 hover:text-purple-400 hidden">Rezervacije</a>
                     <a href="how-it-works.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400">Kako funkcionira</a>
                     <a href="pricing.html" class="block px-2 py-1 text-gray-300 hover:text-purple-400" style="display:none">Cijene</a>
                     <a href="${profileHref}" data-profile-link class="block px-2 py-1 text-gray-300 hover:text-purple-400" style="display:none">Profil</a>
@@ -662,15 +662,15 @@ class BeatSyncNavbar extends HTMLElement {
 
         this.updateProfileLinks();
 
-        const mojiPosloviLink = this.querySelector('#mojiPosloviLink');
-        const mojiPosloviLinkMobile = this.querySelector('#mojiPosloviLinkMobile');
+        const rezervacijeLink = this.querySelector('#rezervacijeLink');
+        const rezervacijeLinkMobile = this.querySelector('#rezervacijeLinkMobile');
 
         if (isLoggedIn) {
             loginBtn.classList.add('hidden');
             profileDropdown.classList.remove('hidden');
             chatBtn.classList.remove('hidden');
-            if (mojiPosloviLink) mojiPosloviLink.classList.remove('hidden');
-            if (mojiPosloviLinkMobile) mojiPosloviLinkMobile.classList.remove('hidden');
+            if (rezervacijeLink) rezervacijeLink.classList.remove('hidden');
+            if (rezervacijeLinkMobile) rezervacijeLinkMobile.classList.remove('hidden');
             this.ucitajBadge();
             // Badge polling svakih 30s
             if (!this._badgeInterval) {
@@ -680,8 +680,8 @@ class BeatSyncNavbar extends HTMLElement {
             loginBtn.classList.remove('hidden');
             profileDropdown.classList.add('hidden');
             chatBtn.classList.add('hidden');
-            if (mojiPosloviLink) mojiPosloviLink.classList.add('hidden');
-            if (mojiPosloviLinkMobile) mojiPosloviLinkMobile.classList.add('hidden');
+            if (rezervacijeLink) rezervacijeLink.classList.add('hidden');
+            if (rezervacijeLinkMobile) rezervacijeLinkMobile.classList.add('hidden');
             if (this._badgeInterval) {
                 clearInterval(this._badgeInterval);
                 this._badgeInterval = null;

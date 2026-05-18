@@ -15,7 +15,12 @@
     <beat-sync-navbar></beat-sync-navbar>
 
     <main class="container mx-auto px-4 py-8 max-w-5xl">
-        <h1 class="text-4xl font-bold mb-8 text-center">Moje Rezervacije</h1>
+        <div class="flex items-center gap-4 mb-8">
+            <a href="javascript:history.back()" class="text-purple-400 hover:text-purple-300 flex items-center gap-1 text-sm">
+                <i data-feather="arrow-left" class="w-4 h-4"></i> Nazad
+            </a>
+            <h1 class="text-4xl font-bold">Moje Rezervacije</h1>
+        </div>
 
         <div id="loginMsg" class="hidden text-center py-16 text-gray-400">
             <p class="text-lg mb-4">Prijavite se za pregled rezervacija.</p>

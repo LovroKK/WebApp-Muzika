@@ -163,7 +163,8 @@
             }
 
             return `
-                <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:shadow-lg transition-shadow flex flex-col gap-3">
+                <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:shadow-lg hover:border-purple-700 transition-all flex flex-col gap-3 cursor-pointer"
+                     onclick="otvoriModal(${p.idPonude})">
                     <div class="flex justify-between items-start">
                         <h3 class="text-lg font-semibold leading-tight">${p.nazivPonude}</h3>
                         <span class="bg-green-700/60 text-green-300 text-xs px-2 py-1 rounded whitespace-nowrap ml-2">Aktivna</span>
@@ -178,12 +179,27 @@
                     ${p.opisPosla ? `<p class="text-sm text-gray-300 line-clamp-2">${p.opisPosla}</p>` : ''}
                     <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-700">
                         <span class="text-purple-400 font-semibold">${budzet}</span>
-                        ${akcija}
+                        <span onclick="event.stopPropagation()">${akcija}</span>
                     </div>
                 </div>`;
         }
 
-        async function prijaviSe(id, btn) {
+        let _pendingPrijavaId = null;
+        let _pendingPrijavaBtn = null;
+        let _pendingPrijavaIsModal = false;
+
+        function prijaviSe(id, btn) {
+            _pendingPrijavaId = id;
+            _pendingPrijavaBtn = btn;
+            _pendingPrijavaIsModal = false;
+            document.getElementById('confirmPrijavaModal').classList.remove('hidden');
+        }
+
+        async function _izvrsiPrijavu() {
+            document.getElementById('confirmPrijavaModal').classList.add('hidden');
+            const id = _pendingPrijavaId;
+            const btn = _pendingPrijavaBtn;
+            const isModal = _pendingPrijavaIsModal;
             btn.disabled = true;
             btn.textContent = 'Prijava...';
             try {
@@ -193,13 +209,114 @@
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Greška');
-                btn.textContent = 'Prijavljeni ✓';
-                btn.className = 'bg-gray-600 px-4 py-2 rounded text-sm cursor-not-allowed opacity-60';
+                if (isModal) {
+                    btn.textContent = 'Prijavljeni ✓';
+                    btn.className = 'bg-gray-600 px-6 py-2 rounded text-sm cursor-not-allowed opacity-60';
+                } else {
+                    btn.textContent = 'Prijavljeni ✓';
+                    btn.className = 'bg-gray-600 px-4 py-2 rounded text-sm cursor-not-allowed opacity-60';
+                }
+                btn.disabled = true;
+                const p = sveponude.find(x => x.idPonude === id);
+                if (p) p.jeliPrijavljen = true;
+                prikaziPonude(sveponude);
             } catch (err) {
                 btn.textContent = err.message;
                 btn.disabled = false;
             }
         }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') document.getElementById('jobDetailModal').classList.add('hidden');
+        });
+
+        function otvoriModal(idPonude) {
+            const p = sveponude.find(x => x.idPonude === idPonude);
+            if (!p) return;
+            const datum = p.datum ? new Date(p.datum).toLocaleDateString('hr-HR') : '—';
+            const poc = p.pocetak ? String(p.pocetak).substring(0, 5) : '—';
+            const kraj = p.kraj ? String(p.kraj).substring(0, 5) : '—';
+            document.getElementById('modalNaziv').textContent = p.nazivPonude;
+            document.getElementById('modalKlub').textContent = p.nazivKluba + ' (@' + p.businessUsername + ')';
+            document.getElementById('modalDatum').textContent = datum;
+            document.getElementById('modalVrijeme').textContent = poc + ' – ' + kraj;
+            document.getElementById('modalLokacija').textContent = p.lokacija || '—';
+            document.getElementById('modalBudzet').textContent = p.budzet ? p.budzet + ' €' : 'Po dogovoru';
+            document.getElementById('modalOpis').textContent = p.opisPosla || '—';
+            const iskWrap = document.getElementById('modalIskustvoWrap');
+            if (p.potrebnoIskustvo) {
+                iskWrap.classList.remove('hidden');
+                document.getElementById('modalIskustvo').textContent = p.potrebnoIskustvo;
+            } else {
+                iskWrap.classList.add('hidden');
+            }
+            const akcijaWrap = document.getElementById('modalAkcijaWrap');
+            akcijaWrap.innerHTML = '';
+            if (role === 'IZVODAC') {
+                if (p.jeliPrijavljen) {
+                    akcijaWrap.innerHTML = `<button disabled class="bg-gray-600 px-6 py-2 rounded text-sm opacity-60 cursor-not-allowed">Prijavljeni ✓</button>`;
+                } else {
+                    akcijaWrap.innerHTML = `<button onclick="prijaviSeModal(${p.idPonude}, this)" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded text-sm transition">Prijavi se</button>`;
+                }
+            }
+            document.getElementById('jobDetailModal').classList.remove('hidden');
+            feather.replace();
+        }
+
+        function zatvoriModal() {
+            document.getElementById('jobDetailModal').classList.add('hidden');
+        }
+
+        function prijaviSeModal(id, btn) {
+            _pendingPrijavaId = id;
+            _pendingPrijavaBtn = btn;
+            _pendingPrijavaIsModal = true;
+            document.getElementById('confirmPrijavaModal').classList.remove('hidden');
+        }
     </script>
+
+    <!-- Potvrda prijave -->
+    <div id="confirmPrijavaModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-sm mx-4 text-center shadow-2xl">
+            <p class="text-gray-100 font-medium mb-1">Prijava na posao</p>
+            <p class="text-gray-400 text-sm mb-6">Želite li se prijaviti na ovaj posao?</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="_izvrsiPrijavu()" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg text-sm font-semibold transition-colors">
+                    Da, prijavi me
+                </button>
+                <button onclick="document.getElementById('confirmPrijavaModal').classList.add('hidden')" class="bg-gray-600 hover:bg-gray-500 px-6 py-2 rounded-lg text-sm font-semibold transition-colors">
+                    Odustani
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Offer Detail Modal -->
+    <div id="jobDetailModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"
+         onclick="zatvoriModal()">
+        <div class="bg-gray-800 rounded-lg p-8 w-full max-w-xl max-h-[90vh] overflow-y-auto mx-4"
+             onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start mb-4">
+                <h2 id="modalNaziv" class="text-2xl font-bold pr-4"></h2>
+                <button onclick="zatvoriModal()" class="text-gray-400 hover:text-white text-3xl leading-none flex-shrink-0">&times;</button>
+            </div>
+            <p id="modalKlub" class="text-purple-400 font-medium mb-4"></p>
+            <div class="space-y-2 text-sm text-gray-300 mb-4">
+                <div class="flex gap-2"><i data-feather="calendar" class="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5"></i><span id="modalDatum"></span></div>
+                <div class="flex gap-2"><i data-feather="clock" class="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5"></i><span id="modalVrijeme"></span></div>
+                <div class="flex gap-2"><i data-feather="map-pin" class="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5"></i><span id="modalLokacija"></span></div>
+                <div class="flex gap-2"><i data-feather="dollar-sign" class="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5"></i><span id="modalBudzet"></span></div>
+            </div>
+            <div class="mb-4">
+                <h3 class="font-semibold mb-2">Opis posla</h3>
+                <p id="modalOpis" class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed"></p>
+            </div>
+            <div id="modalIskustvoWrap" class="mb-4 hidden">
+                <h3 class="font-semibold mb-2">Potrebno iskustvo</h3>
+                <p id="modalIskustvo" class="text-sm text-gray-300"></p>
+            </div>
+            <div id="modalAkcijaWrap" class="mt-6 flex justify-end"></div>
+        </div>
+    </div>
 </body>
 </html>
