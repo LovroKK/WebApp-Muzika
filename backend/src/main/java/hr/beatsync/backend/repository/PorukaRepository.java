@@ -14,6 +14,9 @@ public interface PorukaRepository extends JpaRepository<Poruka, Integer> {
 
     Optional<Poruka> findByIdPoruke(Integer idPoruke);
 
+    void deleteByIzvodacPoruka_UsernameIzvodac(String username);
+    void deleteByBusinessPoruka_UsernameBusiness(String username);
+
     List<Poruka> findByIzvodacPoruka_UsernameIzvodacAndBusinessPoruka_UsernameBusinessOrderByTimestampPorukeAsc(
             String usernameIzvodac, String usernameBusiness);
 

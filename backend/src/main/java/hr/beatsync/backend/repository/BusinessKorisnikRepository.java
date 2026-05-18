@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +17,7 @@ public interface BusinessKorisnikRepository extends JpaRepository<BusinessKorisn
 
     @Query("SELECT b FROM BusinessKorisnik b WHERE BINARY(b.usernameBusiness) = BINARY(:username)")
     Optional<BusinessKorisnik> findByUsernameExact(@Param("username") String username);
+
+    @Query("SELECT b FROM BusinessKorisnik b WHERE b.residentDj.usernameIzvodac = :username")
+    List<BusinessKorisnik> findByResidentDj_UsernameIzvodac(@Param("username") String username);
 }   

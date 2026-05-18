@@ -43,6 +43,7 @@ public class SecurityConfig {
                     "/api/business/avatar/**",
                     "/api/business/slike/**"
                 ).permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

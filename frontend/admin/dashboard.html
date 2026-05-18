@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BeatSync Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-purple-600 p-2 rounded-lg">
+                    <i data-feather="shield" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-lg">BeatSync Admin</span>
+                    <span class="text-gray-400 text-xs ml-2">Control Panel</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-gray-400 text-sm" id="adminUsername"></span>
+                <button onclick="handleLogout()"
+                    class="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors">
+                    <i data-feather="log-out" class="w-4 h-4"></i>
+                    Odjava
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tab navigation -->
+    <div class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex gap-1">
+                <button class="tab-btn px-5 py-3 text-sm font-medium border-b-2 transition-colors"
+                    data-tab="statistike" onclick="switchTab('statistike')">
+                    <span class="flex items-center gap-2">
+                        <i data-feather="bar-chart-2" class="w-4 h-4"></i>
+                        Statistike
+                    </span>
+                </button>
+                <button class="tab-btn px-5 py-3 text-sm font-medium border-b-2 transition-colors"
+                    data-tab="korisnici" onclick="switchTab('korisnici')">
+                    <span class="flex items-center gap-2">
+                        <i data-feather="users" class="w-4 h-4"></i>
+                        Korisnici
+                    </span>
+                </button>
+                <button class="tab-btn px-5 py-3 text-sm font-medium border-b-2 transition-colors"
+                    data-tab="poruke" onclick="switchTab('poruke')">
+                    <span class="flex items-center gap-2">
+                        <i data-feather="message-square" class="w-4 h-4"></i>
+                        Poruke
+                    </span>
+                </button>
+                <button class="tab-btn px-5 py-3 text-sm font-medium border-b-2 transition-colors"
+                    data-tab="rezervacije" onclick="switchTab('rezervacije')">
+                    <span class="flex items-center gap-2">
+                        <i data-feather="calendar" class="w-4 h-4"></i>
+                        Rezervacije
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- TAB: Statistike -->
+        <div id="tab-statistike" class="tab-content">
+            <h2 class="text-xl font-bold mb-6">Pregled platforme</h2>
+            <div id="statsLoading" class="text-gray-400">Učitavam statistike...</div>
+            <div id="statsContent" class="hidden">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <p class="text-gray-400 text-sm mb-1">Ukupno DJ-eva</p>
+                        <p class="text-3xl font-bold text-purple-400" id="statIzvodaci">—</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <p class="text-gray-400 text-sm mb-1">Ukupno Klubova</p>
+                        <p class="text-3xl font-bold text-blue-400" id="statBusinessi">—</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <p class="text-gray-400 text-sm mb-1">Ukupno poruka</p>
+                        <p class="text-3xl font-bold text-green-400" id="statPoruke">—</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <p class="text-gray-400 text-sm mb-1">Ukupno rezervacija</p>
+                        <p class="text-3xl font-bold text-yellow-400" id="statRezervacije">—</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <p class="text-gray-400 text-sm mb-1">Aktivne rezervacije</p>
+                        <p class="text-3xl font-bold text-orange-400" id="statAktivne">—</p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold mb-4">Rezervacije po statusu</h3>
+                <div id="statusGrid" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
+            </div>
+        </div>
+
+        <!-- TAB: Korisnici -->
+        <div id="tab-korisnici" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Upravljanje korisnicima</h2>
+                <div class="flex gap-2">
+                    <button onclick="loadUsers('SVE')" data-filter="SVE"
+                        class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors">Svi</button>
+                    <button onclick="loadUsers('IZVODAC')" data-filter="IZVODAC"
+                        class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors">DJ-evi</button>
+                    <button onclick="loadUsers('BUSINESS')" data-filter="BUSINESS"
+                        class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors">Klubovi</button>
+                </div>
+            </div>
+
+            <div id="usersLoading" class="text-gray-400">Učitavam korisnike...</div>
+            <div id="usersContent" class="hidden">
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Username</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Tip</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Ime / Naziv</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Email</th>
+                                <th class="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                    <div id="usersEmpty" class="hidden text-center text-gray-400 py-8">Nema korisnika</div>
+                </div>
+                <p class="text-gray-400 text-sm mt-3" id="usersCount"></p>
+            </div>
+        </div>
+
+        <!-- TAB: Poruke -->
+        <div id="tab-poruke" class="tab-content hidden">
+            <h2 class="text-xl font-bold mb-6">Moderacija poruka</h2>
+            <div id="messagesLoading" class="text-gray-400">Učitavam poruke...</div>
+            <div id="messagesContent" class="hidden">
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Pošiljatelj</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Sadržaj</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Tip</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Datum</th>
+                                <th class="px-4 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="messagesTable"></tbody>
+                    </table>
+                    <div id="messagesEmpty" class="hidden text-center text-gray-400 py-8">Nema poruka</div>
+                </div>
+
+                <!-- Paginacija -->
+                <div class="flex items-center justify-between mt-4">
+                    <p class="text-gray-400 text-sm" id="messagesInfo"></p>
+                    <div class="flex gap-2">
+                        <button onclick="loadMessages(currentMsgPage - 1)" id="btnPrevMsg"
+                            class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm disabled:opacity-40">
+                            ← Prethodna
+                        </button>
+                        <button onclick="loadMessages(currentMsgPage + 1)" id="btnNextMsg"
+                            class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm disabled:opacity-40">
+                            Sljedeća →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Rezervacije -->
+        <div id="tab-rezervacije" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Pregled rezervacija</h2>
+                <select id="statusFilter" onchange="loadBookings(0)"
+                    class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500">
+                    <option value="">Svi statusi</option>
+                    <option value="REQUESTED">REQUESTED</option>
+                    <option value="ACCEPTED">ACCEPTED</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="CANCELLED">CANCELLED</option>
+                </select>
+            </div>
+
+            <div id="bookingsLoading" class="text-gray-400">Učitavam rezervacije...</div>
+            <div id="bookingsContent" class="hidden">
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">ID</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">DJ</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Klub</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Status</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Od</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Do</th>
+                                <th class="text-left px-4 py-3 text-sm text-gray-300">Potvrde</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTable"></tbody>
+                    </table>
+                    <div id="bookingsEmpty" class="hidden text-center text-gray-400 py-8">Nema rezervacija</div>
+                </div>
+
+                <div class="flex items-center justify-between mt-4">
+                    <p class="text-gray-400 text-sm" id="bookingsInfo"></p>
+                    <div class="flex gap-2">
+                        <button onclick="loadBookings(currentBkPage - 1)" id="btnPrevBk"
+                            class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm disabled:opacity-40">
+                            ← Prethodna
+                        </button>
+                        <button onclick="loadBookings(currentBkPage + 1)" id="btnNextBk"
+                            class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm disabled:opacity-40">
+                            Sljedeća →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Confirm dialog -->
+    <div id="confirmDialog" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 shadow-2xl">
+            <h3 class="font-semibold text-lg mb-2" id="confirmTitle">Potvrda</h3>
+            <p class="text-gray-400 text-sm mb-6" id="confirmText"></p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeConfirm()"
+                    class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm">Odustani</button>
+                <button id="confirmOkBtn"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium">Obriši</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .tab-btn { color: #9ca3af; border-color: transparent; }
+        .tab-btn.active { color: #a855f7; border-color: #a855f7; }
+        .filter-btn { background: #374151; color: #9ca3af; }
+        .filter-btn.active { background: #7c3aed; color: white; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-REQUESTED { background: #1e3a5f; color: #60a5fa; }
+        .status-ACCEPTED { background: #14532d; color: #4ade80; }
+        .status-IN_PROGRESS { background: #431407; color: #fb923c; }
+        .status-COMPLETED { background: #1e1b4b; color: #a78bfa; }
+        .status-CANCELLED { background: #3f1313; color: #f87171; }
+    </style>
+
+    <script type="module">
+        import { requireAdmin, logout, apiFetch } from './admin.js';
+
+        requireAdmin();
+
+        window.handleLogout = logout;
+
+        document.getElementById('adminUsername').textContent = localStorage.getItem('username') || 'admin';
+
+        // --- Tab switching ---
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+            if (tab === 'statistike') loadStats();
+            if (tab === 'korisnici') loadUsers('SVE');
+            if (tab === 'poruke') loadMessages(0);
+            if (tab === 'rezervacije') loadBookings(0);
+        };
+
+        // --- STATS ---
+        async function loadStats() {
+            document.getElementById('statsLoading').classList.remove('hidden');
+            document.getElementById('statsContent').classList.add('hidden');
+            try {
+                const res = await apiFetch('/stats');
+                const d = await res.json();
+                document.getElementById('statIzvodaci').textContent = d.totalIzvodaci;
+                document.getElementById('statBusinessi').textContent = d.totalBusinessi;
+                document.getElementById('statPoruke').textContent = d.totalPoruke;
+                document.getElementById('statRezervacije').textContent = d.totalRezervacije;
+                document.getElementById('statAktivne').textContent = d.aktivneRezervacije;
+
+                const grid = document.getElementById('statusGrid');
+                grid.innerHTML = '';
+                const colors = {
+                    REQUESTED: 'text-blue-400', ACCEPTED: 'text-green-400',
+                    IN_PROGRESS: 'text-orange-400', COMPLETED: 'text-purple-400', CANCELLED: 'text-red-400'
+                };
+                for (const [status, count] of Object.entries(d.rezervacijePoStatusu)) {
+                    grid.innerHTML += `
+                        <div class="bg-gray-800 rounded-lg p-4">
+                            <p class="text-gray-400 text-xs mb-1">${status}</p>
+                            <p class="text-2xl font-bold ${colors[status] || 'text-white'}">${count}</p>
+                        </div>`;
+                }
+
+                document.getElementById('statsLoading').classList.add('hidden');
+                document.getElementById('statsContent').classList.remove('hidden');
+            } catch (e) {
+                document.getElementById('statsLoading').textContent = 'Greška pri učitavanju.';
+            }
+        }
+
+        // --- USERS ---
+        window.currentUserFilter = 'SVE';
+        window.loadUsers = async function(tip) {
+            window.currentUserFilter = tip;
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.filter === tip);
+            });
+            document.getElementById('usersLoading').classList.remove('hidden');
+            document.getElementById('usersContent').classList.add('hidden');
+            try {
+                const res = await apiFetch(`/users?tip=${tip}`);
+                const d = await res.json();
+                const tbody = document.getElementById('usersTable');
+                const empty = document.getElementById('usersEmpty');
+                tbody.innerHTML = '';
+
+                if (d.users.length === 0) {
+                    empty.classList.remove('hidden');
+                } else {
+                    empty.classList.add('hidden');
+                    d.users.forEach(u => {
+                        const tipBadge = u.tip === 'IZVODAC'
+                            ? '<span class="text-purple-400 text-xs font-semibold">DJ</span>'
+                            : '<span class="text-blue-400 text-xs font-semibold">KLUB</span>';
+                        tbody.innerHTML += `
+                            <tr class="border-t border-gray-700 hover:bg-gray-750">
+                                <td class="px-4 py-3 font-mono text-sm">${escHtml(u.username)}</td>
+                                <td class="px-4 py-3">${tipBadge}</td>
+                                <td class="px-4 py-3 text-sm">${escHtml(u.ime)}</td>
+                                <td class="px-4 py-3 text-sm text-gray-400">${escHtml(u.email)}</td>
+                                <td class="px-4 py-3 text-right">
+                                    <button onclick="confirmDelete('${escHtml(u.tip)}','${escHtml(u.username)}')"
+                                        class="text-red-400 hover:text-red-300 text-sm">
+                                        <i data-feather="trash-2" class="w-4 h-4 inline"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
+                    });
+                    feather.replace();
+                }
+
+                document.getElementById('usersCount').textContent = `Ukupno: ${d.total} korisnika`;
+                document.getElementById('usersLoading').classList.add('hidden');
+                document.getElementById('usersContent').classList.remove('hidden');
+            } catch (e) {
+                document.getElementById('usersLoading').textContent = 'Greška pri učitavanju.';
+            }
+        };
+
+        window.confirmDelete = function(tip, username) {
+            document.getElementById('confirmTitle').textContent = 'Obriši korisnika?';
+            document.getElementById('confirmText').textContent =
+                `Sigurno želiš obrisati korisnika "${username}"? Ova radnja se ne može poništiti.`;
+            document.getElementById('confirmDialog').classList.remove('hidden');
+            document.getElementById('confirmOkBtn').onclick = async () => {
+                closeConfirm();
+                await deleteUser(tip, username);
+            };
+        };
+
+        async function deleteUser(tip, username) {
+            const path = tip === 'IZVODAC' ? `/users/izvodac/${username}` : `/users/business/${username}`;
+            try {
+                await apiFetch(path, { method: 'DELETE' });
+                loadUsers(window.currentUserFilter);
+            } catch (e) {
+                alert('Greška pri brisanju korisnika.');
+            }
+        }
+
+        // --- MESSAGES ---
+        window.currentMsgPage = 0;
+        window.loadMessages = async function(page) {
+            if (page < 0) return;
+            window.currentMsgPage = page;
+            document.getElementById('messagesLoading').classList.remove('hidden');
+            document.getElementById('messagesContent').classList.add('hidden');
+            try {
+                const res = await apiFetch(`/messages?page=${page}&size=20`);
+                const d = await res.json();
+                const tbody = document.getElementById('messagesTable');
+                const empty = document.getElementById('messagesEmpty');
+                tbody.innerHTML = '';
+
+                if (d.messages.length === 0) {
+                    empty.classList.remove('hidden');
+                } else {
+                    empty.classList.add('hidden');
+                    d.messages.forEach(m => {
+                        const sender = m.posiljatelj === 'IZVODAC' ? m.usernameIzvodac : m.usernameBusiness;
+                        const senderLabel = m.posiljatelj === 'IZVODAC'
+                            ? `<span class="text-purple-400">${escHtml(sender)}</span>`
+                            : `<span class="text-blue-400">${escHtml(sender)}</span>`;
+                        const sadrzaj = m.sadrzaj.length > 80 ? m.sadrzaj.substring(0, 80) + '…' : m.sadrzaj;
+                        const tipBadge = m.tip === 'CHAT'
+                            ? '<span class="text-xs text-green-400">CHAT</span>'
+                            : '<span class="text-xs text-yellow-400">NOTIF</span>';
+                        const datum = new Date(m.timestamp).toLocaleString('hr-HR');
+                        tbody.innerHTML += `
+                            <tr class="border-t border-gray-700 hover:bg-gray-750">
+                                <td class="px-4 py-3 text-sm">${senderLabel}</td>
+                                <td class="px-4 py-3 text-sm text-gray-300 max-w-xs">${escHtml(sadrzaj)}</td>
+                                <td class="px-4 py-3">${tipBadge}</td>
+                                <td class="px-4 py-3 text-sm text-gray-400">${datum}</td>
+                                <td class="px-4 py-3 text-right">
+                                    <button onclick="confirmDeleteMsg(${m.id})"
+                                        class="text-red-400 hover:text-red-300 text-sm">
+                                        <i data-feather="trash-2" class="w-4 h-4 inline"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
+                    });
+                    feather.replace();
+                }
+
+                document.getElementById('messagesInfo').textContent =
+                    `Stranica ${page + 1} od ${d.totalPages} · Ukupno ${d.totalElements} poruka`;
+                document.getElementById('btnPrevMsg').disabled = page === 0;
+                document.getElementById('btnNextMsg').disabled = page >= d.totalPages - 1;
+                document.getElementById('messagesLoading').classList.add('hidden');
+                document.getElementById('messagesContent').classList.remove('hidden');
+            } catch (e) {
+                document.getElementById('messagesLoading').textContent = 'Greška pri učitavanju.';
+            }
+        };
+
+        window.confirmDeleteMsg = function(id) {
+            document.getElementById('confirmTitle').textContent = 'Obriši poruku?';
+            document.getElementById('confirmText').textContent = 'Sigurno želiš obrisati ovu poruku?';
+            document.getElementById('confirmDialog').classList.remove('hidden');
+            document.getElementById('confirmOkBtn').onclick = async () => {
+                closeConfirm();
+                try {
+                    await apiFetch(`/messages/${id}`, { method: 'DELETE' });
+                    loadMessages(window.currentMsgPage);
+                } catch (e) {
+                    alert('Greška pri brisanju poruke.');
+                }
+            };
+        };
+
+        // --- BOOKINGS ---
+        window.currentBkPage = 0;
+        window.loadBookings = async function(page) {
+            if (page < 0) return;
+            window.currentBkPage = page;
+            const status = document.getElementById('statusFilter').value;
+            document.getElementById('bookingsLoading').classList.remove('hidden');
+            document.getElementById('bookingsContent').classList.add('hidden');
+            try {
+                const res = await apiFetch(`/bookings?status=${status}&page=${page}&size=20`);
+                const d = await res.json();
+                const tbody = document.getElementById('bookingsTable');
+                const empty = document.getElementById('bookingsEmpty');
+                tbody.innerHTML = '';
+
+                if (d.bookings.length === 0) {
+                    empty.classList.remove('hidden');
+                } else {
+                    empty.classList.add('hidden');
+                    d.bookings.forEach(b => {
+                        const od = new Date(b.periodOd).toLocaleString('hr-HR', { dateStyle: 'short', timeStyle: 'short' });
+                        const doo = new Date(b.periodDo).toLocaleString('hr-HR', { dateStyle: 'short', timeStyle: 'short' });
+                        const potvrde = `DJ: ${b.potvrdaIzvodac ? '✓' : '✗'} · Klub: ${b.potvrdaBusiness ? '✓' : '✗'}`;
+                        tbody.innerHTML += `
+                            <tr class="border-t border-gray-700 hover:bg-gray-750">
+                                <td class="px-4 py-3 text-sm text-gray-400">#${b.id}</td>
+                                <td class="px-4 py-3 text-sm text-purple-400">${escHtml(b.usernameIzvodac)}</td>
+                                <td class="px-4 py-3 text-sm text-blue-400">${escHtml(b.usernameBusiness)}</td>
+                                <td class="px-4 py-3"><span class="status-badge status-${b.status}">${b.status}</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-300">${od}</td>
+                                <td class="px-4 py-3 text-sm text-gray-300">${doo}</td>
+                                <td class="px-4 py-3 text-sm text-gray-400">${potvrde}</td>
+                            </tr>`;
+                    });
+                }
+
+                const totalPages = Math.ceil(d.total / 20);
+                document.getElementById('bookingsInfo').textContent =
+                    `Stranica ${page + 1} od ${totalPages || 1} · Ukupno ${d.total} rezervacija`;
+                document.getElementById('btnPrevBk').disabled = page === 0;
+                document.getElementById('btnNextBk').disabled = page >= totalPages - 1;
+                document.getElementById('bookingsLoading').classList.add('hidden');
+                document.getElementById('bookingsContent').classList.remove('hidden');
+            } catch (e) {
+                document.getElementById('bookingsLoading').textContent = 'Greška pri učitavanju.';
+            }
+        };
+
+        // --- Confirm dialog ---
+        window.closeConfirm = function() {
+            document.getElementById('confirmDialog').classList.add('hidden');
+        };
+
+        document.getElementById('confirmDialog').addEventListener('click', function(e) {
+            if (e.target === this) closeConfirm();
+        });
+
+        // --- Utilities ---
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // Init
+        feather.replace();
+        switchTab('statistike');
+    </script>
+</body>
+</html>

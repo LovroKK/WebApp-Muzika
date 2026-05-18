@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="hr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Prijava - BeatSync Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="w-full max-w-md px-4">
+        <div class="bg-gray-800 rounded-lg p-8 shadow-xl">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-full mb-4">
+                    <i data-feather="shield" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-2xl font-bold">Admin Panel</h1>
+                <p class="text-gray-400 text-sm mt-1">BeatSync Connect</p>
+            </div>
+
+            <form id="adminLoginForm" class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium mb-2">Korisničko ime</label>
+                    <input type="text" id="username"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500"
+                        required autocomplete="username">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium mb-2">Lozinka</label>
+                    <input type="password" id="password"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500"
+                        required autocomplete="current-password">
+                </div>
+
+                <p id="errorMsg" class="hidden text-red-400 text-sm text-center"></p>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-medium transition-colors">
+                    Prijavi se
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        if (localStorage.getItem('role') === 'ADMIN') {
+            window.location.href = 'admin/dashboard.html';
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('submitBtn');
+
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Prijava...';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Pogrešno korisničko ime ili lozinka');
+                }
+
+                if (data.role !== 'ADMIN') {
+                    throw new Error('Pristup odbijen — ovo sučelje je samo za administratore');
+                }
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role);
+
+                window.location.href = 'admin/dashboard.html';
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Prijavi se';
+            }
+        });
+    </script>
+</body>
+</html>

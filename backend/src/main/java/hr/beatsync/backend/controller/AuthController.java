@@ -7,6 +7,7 @@ import hr.beatsync.backend.repository.BusinessKorisnikRepository;
 import hr.beatsync.backend.repository.IzvodacKorisnikRepository;
 import hr.beatsync.backend.security.JwtTokenProvider;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,12 @@ public class AuthController {
     private final BusinessKorisnikRepository businessRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+
+    @Value("${admin.username}")
+    private String adminUsername;
+
+    @Value("${admin.password}")
+    private String adminPassword;
 
     public AuthController(IzvodacKorisnikRepository izvodacRepo,
                           BusinessKorisnikRepository businessRepo,
@@ -92,6 +99,15 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+
+        // Admin provjera (hardcoded, nije u bazi)
+        if (adminUsername.equals(request.getUsername())) {
+            if (!passwordEncoder.matches(request.getPassword(), adminPassword)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Pogrešno korisničko ime ili lozinka");
+            }
+            String token = jwtTokenProvider.generateToken(adminUsername, "ADMIN");
+            return ResponseEntity.ok(new AuthResponse(token, adminUsername, "ADMIN"));
+        }
 
         // Prvo trazi izvođača
         var izvodacOpt = izvodacRepo.findByUsernameExact(request.getUsername());
