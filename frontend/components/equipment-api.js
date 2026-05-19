@@ -193,6 +193,17 @@ function renderEquipmentPageApi() {
                    </button>`
                 : '';
 
+            const canRent = currentTokenForBtn && !isVlasnik;
+            const rentBtn = canRent
+                ? `<button
+                      type="button"
+                      data-rent-id="${id}"
+                      data-rent-naziv="${naziv}"
+                      class="rent-equipment-btn bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm transition">Zatraži najam</button>`
+                : currentTokenForBtn
+                    ? `<span class="text-xs text-gray-500 italic">Vaša oprema</span>`
+                    : `<button type="button" onclick="window.location.href='auth.html'" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-sm transition">Prijava za najam</button>`;
+
             return `
                 <article id="equipment-card-${id}" class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-purple-500/50 hover:-translate-y-1 transition duration-200 shadow-lg">
                     <img src="${slika}" alt="${naziv}" class="w-full h-48 object-cover" onerror="this.src='${EQUIPMENT_DEFAULT_IMAGE}'">
@@ -207,7 +218,7 @@ function renderEquipmentPageApi() {
                         <p class="text-gray-400 text-sm mb-4">Dostupno u: ${lokacije}</p>
                         <div class="flex justify-between items-center gap-3">
                             <span class="text-purple-400 font-medium">€${formatPrice(listing.cijena)}/dan</span>
-                            <button type="button" class="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm">Pošalji upit</button>
+                            ${rentBtn}
                         </div>
                     </div>
                 </article>
@@ -220,6 +231,13 @@ function renderEquipmentPageApi() {
                 const id = parseInt(btn.dataset.deleteId, 10);
                 const card = document.getElementById(`equipment-card-${id}`);
                 deleteEquipmentListing(id, card);
+            });
+        });
+
+        // Veži event listenere za zahtjev najma
+        equipmentGrid.querySelectorAll('.rent-equipment-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                openRentalModal(parseInt(btn.dataset.rentId, 10), btn.dataset.rentNaziv);
             });
         });
 
@@ -388,6 +406,109 @@ function renderCreateEquipmentPageApi() {
             setMessage(errorMessage, error.message || 'Greška pri spremanju oglasa za opremu.');
         }
     });
+}
+
+function openRentalModal(opremaId, naziv) {
+    let modal = document.getElementById('rentalModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'rentalModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;';
+        modal.innerHTML = `
+            <div style="background:#1f2937;border:1px solid #374151;border-radius:12px;padding:24px;width:100%;max-width:420px;color:#e5e7eb;">
+                <h3 style="font-size:16px;font-weight:700;color:#e9d5ff;margin-bottom:4px;" id="rentalModalTitle">Zatraži najam</h3>
+                <p style="font-size:12px;color:#6b7280;margin-bottom:16px;" id="rentalModalNaziv"></p>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;color:#9ca3af;display:block;margin-bottom:4px;">Datum od</label>
+                    <input type="date" id="rentalPeriodOd" style="width:100%;background:#374151;border:1px solid #4b5563;border-radius:8px;padding:8px 12px;color:#e5e7eb;font-size:13px;box-sizing:border-box;">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;color:#9ca3af;display:block;margin-bottom:4px;">Datum do</label>
+                    <input type="date" id="rentalPeriodDo" style="width:100%;background:#374151;border:1px solid #4b5563;border-radius:8px;padding:8px 12px;color:#e5e7eb;font-size:13px;box-sizing:border-box;">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="font-size:12px;color:#9ca3af;display:block;margin-bottom:4px;">Napomena (opcionalno)</label>
+                    <textarea id="rentalNapomena" rows="2" placeholder="Detalji o korištenju..." style="width:100%;background:#374151;border:1px solid #4b5563;border-radius:8px;padding:8px 12px;color:#e5e7eb;font-size:13px;resize:none;box-sizing:border-box;"></textarea>
+                </div>
+                <div id="rentalError" style="display:none;margin-bottom:12px;padding:8px 12px;background:#450a0a;color:#fca5a5;border-radius:8px;font-size:13px;"></div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button id="rentalCancel" style="padding:8px 16px;background:#374151;color:#9ca3af;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Odustani</button>
+                    <button id="rentalSubmit" style="padding:8px 16px;background:#5b21b6;color:#e9d5ff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">Pošalji zahtjev</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('rentalCancel').addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+    }
+
+    modal.dataset.opremaId = opremaId;
+    document.getElementById('rentalModalNaziv').textContent = naziv;
+    document.getElementById('rentalPeriodOd').value = '';
+    document.getElementById('rentalPeriodDo').value = '';
+    document.getElementById('rentalNapomena').value = '';
+    document.getElementById('rentalError').style.display = 'none';
+    modal.style.display = 'flex';
+
+    const submitBtn = document.getElementById('rentalSubmit');
+    const newSubmit = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(newSubmit, submitBtn);
+    newSubmit.addEventListener('click', () => submitRentalRequest(modal));
+}
+
+async function submitRentalRequest(modal) {
+    const opremaId = parseInt(modal.dataset.opremaId);
+    const periodOd = document.getElementById('rentalPeriodOd').value;
+    const periodDo = document.getElementById('rentalPeriodDo').value;
+    const napomena = document.getElementById('rentalNapomena').value.trim();
+    const errorEl = document.getElementById('rentalError');
+
+    errorEl.style.display = 'none';
+
+    if (!periodOd || !periodDo) {
+        errorEl.textContent = 'Odaberite period najma.';
+        errorEl.style.display = 'block';
+        return;
+    }
+    if (periodOd > periodDo) {
+        errorEl.textContent = 'Datum od mora biti prije datuma do.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    const token = getEquipmentToken();
+    try {
+        const res = await fetch(`${EQUIPMENT_API_BASE_URL}/najam-opreme`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ opremaId, periodOd, periodDo, napomena: napomena || null })
+        });
+
+        if (!res.ok) {
+            const msg = await parseEquipmentApiError(res, 'Greška pri slanju zahtjeva.');
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        modal.style.display = 'none';
+        const toast = document.createElement('div');
+        toast.textContent = 'Zahtjev za najam uspješno poslan!';
+        toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#065f46;color:#6ee7b7;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:3000;box-shadow:0 4px 12px rgba(0,0,0,0.4);';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    } catch {
+        errorEl.textContent = 'Greška pri slanju zahtjeva.';
+        errorEl.style.display = 'block';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

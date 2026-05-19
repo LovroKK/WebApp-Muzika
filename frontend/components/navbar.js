@@ -188,6 +188,7 @@ class BeatSyncNavbar extends HTMLElement {
                 .status-IN_PROGRESS { background: #1e3a8a; color: #93c5fd; }
                 .status-COMPLETED { background: #374151; color: #9ca3af; }
                 .status-CANCELLED { background: #450a0a; color: #fca5a5; }
+                .status-REJECTED  { background: #450a0a; color: #fca5a5; }
             </style>
 
             <nav class="bg-gray-800 py-4 px-6 shadow-lg">
@@ -250,10 +251,11 @@ class BeatSyncNavbar extends HTMLElement {
                     <button id="chatPanelClose" style="background:none; border:none; color:#9ca3af; cursor:pointer; font-size:20px; line-height:1;">&#x2715;</button>
                 </div>
 
-                <!-- Tab bar (only for BUSINESS) -->
+                <!-- Tab bar -->
                 <div id="chatTabBar" style="display:none; flex-direction:row;">
                     <button class="chat-tab-btn active" id="tabZahtjevi" data-tab="ZAHTJEVI">Zahtjevi</button>
                     <button class="chat-tab-btn" id="tabRazgovori" data-tab="RAZGOVORI">Razgovori</button>
+                    <button class="chat-tab-btn" id="tabOprema" data-tab="OPREMA">Oprema</button>
                 </div>
 
                 <!-- Inbox list view -->
@@ -306,9 +308,10 @@ class BeatSyncNavbar extends HTMLElement {
         overlay.addEventListener('click', () => this._closePanel());
         closeBtn.addEventListener('click', () => this._closePanel());
 
-        // Tab switching (BUSINESS only)
+        // Tab switching
         this.querySelector('#tabZahtjevi').addEventListener('click', () => this._switchTab('ZAHTJEVI'));
         this.querySelector('#tabRazgovori').addEventListener('click', () => this._switchTab('RAZGOVORI'));
+        this.querySelector('#tabOprema').addEventListener('click', () => this._switchTab('OPREMA'));
 
         // Back button
         this.querySelector('#chatBackBtn').addEventListener('click', () => this._showInbox());
@@ -322,6 +325,8 @@ class BeatSyncNavbar extends HTMLElement {
         this._currentTab = 'ZAHTJEVI';
         this._currentRezervacija = null;
         this._currentConvData = null;
+        this._currentConvType = 'NASTUP';
+        this._currentNajam = null;
         this._pollInterval = null;
     }
 
@@ -353,9 +358,28 @@ class BeatSyncNavbar extends HTMLElement {
         this.querySelector('#chatConvView').style.display = 'none';
         this.querySelector('#chatInboxView').style.display = '';
         const role = localStorage.getItem('role');
+        const tabBar = this.querySelector('#chatTabBar');
+        const tabZahtjevi = this.querySelector('#tabZahtjevi');
+        const tabRazgovori = this.querySelector('#tabRazgovori');
+        const tabOprema = this.querySelector('#tabOprema');
+
         if (role === 'BUSINESS') {
-            this.querySelector('#chatTabBar').style.display = 'flex';
+            tabBar.style.display = 'flex';
+            tabZahtjevi.style.display = '';
+            tabRazgovori.style.display = '';
+            tabOprema.style.display = '';
+            if (this._currentTab === 'NASTUP') this._currentTab = 'ZAHTJEVI';
+        } else if (role === 'IZVODAC') {
+            tabBar.style.display = 'flex';
+            tabZahtjevi.style.display = 'none';
+            tabRazgovori.textContent = 'Nastup';
+            tabRazgovori.style.display = '';
+            tabOprema.style.display = '';
+            if (this._currentTab === 'ZAHTJEVI') this._currentTab = 'RAZGOVORI';
+        } else {
+            tabBar.style.display = 'none';
         }
+
         this.querySelector('#chatPanelTitle').textContent = 'Poruke';
         await this._loadInbox();
     }
@@ -367,6 +391,15 @@ class BeatSyncNavbar extends HTMLElement {
         inboxView.innerHTML = '<div style="padding:20px; text-align:center; color:#6b7280; font-size:13px;">Učitavanje...</div>';
 
         try {
+            if (this._currentTab === 'OPREMA') {
+                const res = await fetch('http://localhost:8080/api/poruke-opreme/inbox', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const items = await res.json();
+                this._renderOpremaInbox(items, role);
+                return;
+            }
+
             if (role === 'BUSINESS') {
                 this.querySelector('#chatTabBar').style.display = 'flex';
                 const type = this._currentTab;
@@ -380,7 +413,6 @@ class BeatSyncNavbar extends HTMLElement {
                     this._renderRazgovori(items);
                 }
             } else {
-                this.querySelector('#chatTabBar').style.display = 'none';
                 const res = await fetch('http://localhost:8080/api/poruke/inbox?type=RAZGOVORI', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -474,9 +506,177 @@ class BeatSyncNavbar extends HTMLElement {
         });
     }
 
+    _renderOpremaInbox(items, role) {
+        const inboxView = this.querySelector('#chatInboxView');
+        if (!items.length) {
+            inboxView.innerHTML = '<div style="padding:20px; text-align:center; color:#6b7280; font-size:13px;">Nema aktivnih zahtjeva za opremu.</div>';
+            return;
+        }
+        const username = localStorage.getItem('username');
+        inboxView.innerHTML = items.map(item => {
+            const isVlasnik = item.vlasnikUsername === username;
+            const otherParty = isVlasnik ? item.najmoprimacUsername : item.vlasnikUsername;
+            const initial = (otherParty || '?')[0].toUpperCase();
+            const tipLabel = item.tip === 'ZAHTJEV_NAJMA' ? 'Novi zahtjev' : 'Razgovor';
+            const statusBadge = `<span class="status-badge status-${item.statusNajma}">${this._statusLabel(item.statusNajma)}</span>`;
+            const showActions = item.tip === 'ZAHTJEV_NAJMA' && isVlasnik;
+            const actions = showActions ? `
+                <div class="inbox-actions">
+                    <button class="btn-sm-green" data-action="otvori-chat-oprema" data-najam="${item.najamId}">Otvori chat</button>
+                    <button class="btn-sm-red" data-action="odbij-najam" data-najam="${item.najamId}">Odbij</button>
+                </div>` : '';
+            return `
+                <div class="inbox-item ${!item.readStatus ? 'unread' : ''}" data-action="${showActions ? '' : 'open-conv-oprema'}" data-najam="${item.najamId}">
+                    <div class="inbox-avatar" style="background:#0f4c75;">${initial}</div>
+                    <div class="inbox-meta">
+                        <div class="inbox-name">${otherParty}</div>
+                        <div class="inbox-sub">${item.nazivOpreme} · ${statusBadge}</div>
+                        <div class="inbox-preview">${item.lastMessage || tipLabel}</div>
+                        ${actions}
+                    </div>
+                    <div class="inbox-time">${this._formatTime(item.timestamp)}</div>
+                </div>
+            `;
+        }).join('');
+
+        inboxView.querySelectorAll('[data-action="otvori-chat-oprema"]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const najamId = parseInt(btn.dataset.najam);
+                const token = localStorage.getItem('token');
+                await fetch(`http://localhost:8080/api/poruke-opreme/otvori-chat/${najamId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                this._openEquipmentConversation(najamId);
+            });
+        });
+
+        inboxView.querySelectorAll('[data-action="odbij-najam"]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const najamId = parseInt(btn.dataset.najam);
+                const token = localStorage.getItem('token');
+                await fetch(`http://localhost:8080/api/najam-opreme/${najamId}/odbij`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                await this._loadInbox();
+                this.ucitajBadge();
+            });
+        });
+
+        inboxView.querySelectorAll('[data-action="open-conv-oprema"]').forEach(el => {
+            el.addEventListener('click', () => {
+                this._openEquipmentConversation(parseInt(el.dataset.najam));
+            });
+        });
+    }
+
+    async _openEquipmentConversation(najamId) {
+        this._currentNajam = najamId;
+        this._currentConvType = 'OPREMA';
+        this.querySelector('#chatInboxView').style.display = 'none';
+        this.querySelector('#chatTabBar').style.display = 'none';
+        const convView = this.querySelector('#chatConvView');
+        convView.style.display = 'flex';
+        this.querySelector('#chatPanelTitle').textContent = 'Oprema — razgovor';
+        await this._loadEquipmentConversation();
+        this._startPolling();
+    }
+
+    async _loadEquipmentConversation() {
+        const najamId = this._currentNajam;
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+
+        try {
+            const [porukeRes, najamRes] = await Promise.all([
+                fetch(`http://localhost:8080/api/poruke-opreme?najam=${najamId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                }),
+                fetch(`http://localhost:8080/api/najam-opreme`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                })
+            ]);
+
+            const poruke = await porukeRes.json();
+            const sviNajmovi = await najamRes.json();
+            const najam = sviNajmovi.find(n => n.idNajma === najamId);
+
+            if (najam) {
+                const isVlasnik = najam.vlasnikUsername === username;
+                const otherParty = isVlasnik ? najam.najmoprimacUsername : najam.vlasnikUsername;
+                this.querySelector('#chatConvName').textContent = otherParty;
+                this.querySelector('#chatConvMeta').textContent = najam.nazivOpreme + ' · ' + najam.periodOd + ' — ' + najam.periodDo;
+                const statusEl = this.querySelector('#chatConvStatus');
+                statusEl.textContent = this._statusLabel(najam.status);
+                statusEl.className = `status-badge status-${najam.status}`;
+                this._renderOpremaConvActions(najam, isVlasnik);
+            }
+
+            this._renderEquipmentMessages(poruke, username);
+            this.ucitajBadge();
+        } catch (e) {
+            console.error('Greška pri učitavanju razgovora o opremi', e);
+        }
+    }
+
+    _renderOpremaConvActions(najam, isVlasnik) {
+        const actionsEl = this.querySelector('#chatConvActions');
+        actionsEl.innerHTML = '';
+        if (najam.status !== 'REQUESTED') return;
+        if (!isVlasnik) return;
+
+        const token = localStorage.getItem('token');
+
+        const btnPrihvati = document.createElement('button');
+        btnPrihvati.className = 'btn-sm-green';
+        btnPrihvati.style.padding = '6px 14px';
+        btnPrihvati.textContent = 'Prihvati zahtjev';
+        btnPrihvati.addEventListener('click', async () => {
+            await fetch(`http://localhost:8080/api/najam-opreme/${najam.idNajma}/prihvati`, {
+                method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
+            });
+            this._loadEquipmentConversation();
+        });
+        actionsEl.appendChild(btnPrihvati);
+
+        const btnOdbij = document.createElement('button');
+        btnOdbij.className = 'btn-sm-red';
+        btnOdbij.style.padding = '6px 14px';
+        btnOdbij.textContent = 'Odbij zahtjev';
+        btnOdbij.addEventListener('click', async () => {
+            await fetch(`http://localhost:8080/api/najam-opreme/${najam.idNajma}/odbij`, {
+                method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
+            });
+            await this._showInbox();
+            this.ucitajBadge();
+        });
+        actionsEl.appendChild(btnOdbij);
+    }
+
+    _renderEquipmentMessages(poruke, myUsername) {
+        const list = this.querySelector('#chatMsgList');
+        list.innerHTML = poruke.map(p => {
+            if (p.messageType === 'SYSTEM_NOTIFICATION') {
+                return `<div class="chat-msg-bubble chat-msg-system">${p.sadrzajPoruke}</div>`;
+            }
+            const isMine = p.posiljateljeUsername === myUsername;
+            return `
+                <div style="display:flex; flex-direction:column; align-items:${isMine ? 'flex-end' : 'flex-start'};">
+                    <div class="chat-msg-bubble ${isMine ? 'chat-msg-mine' : 'chat-msg-other'}">${this._escHtml(p.sadrzajPoruke)}</div>
+                    <div class="chat-msg-time">${this._formatTime(p.timestampPoruke)}</div>
+                </div>
+            `;
+        }).join('');
+        list.scrollTop = list.scrollHeight;
+    }
+
     async _openConversation(rezId, data) {
         this._currentRezervacija = rezId;
         this._currentConvData = data;
+        this._currentConvType = 'NASTUP';
         this.querySelector('#chatInboxView').style.display = 'none';
         this.querySelector('#chatTabBar').style.display = 'none';
         const convView = this.querySelector('#chatConvView');
@@ -608,21 +808,29 @@ class BeatSyncNavbar extends HTMLElement {
     async _sendMessage() {
         const input = this.querySelector('#chatMsgInput');
         const text = input.value.trim();
-        if (!text || !this._currentRezervacija) return;
+        if (!text) return;
 
         const token = localStorage.getItem('token');
         input.value = '';
 
         try {
-            await fetch('http://localhost:8080/api/poruke', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ sadrzajPoruke: text, idRezervacije: this._currentRezervacija })
-            });
-            await this._loadConversation();
+            if (this._currentConvType === 'OPREMA') {
+                if (!this._currentNajam) return;
+                await fetch('http://localhost:8080/api/poruke-opreme', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sadrzajPoruke: text, najamId: this._currentNajam })
+                });
+                await this._loadEquipmentConversation();
+            } else {
+                if (!this._currentRezervacija) return;
+                await fetch('http://localhost:8080/api/poruke', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sadrzajPoruke: text, idRezervacije: this._currentRezervacija })
+                });
+                await this._loadConversation();
+            }
         } catch (e) {
             input.value = text;
         }
@@ -631,7 +839,11 @@ class BeatSyncNavbar extends HTMLElement {
     _startPolling() {
         this._stopPolling();
         this._pollInterval = setInterval(() => {
-            if (this._currentRezervacija) this._loadConversation();
+            if (this._currentConvType === 'OPREMA' && this._currentNajam) {
+                this._loadEquipmentConversation();
+            } else if (this._currentRezervacija) {
+                this._loadConversation();
+            }
         }, 5000);
     }
 
@@ -695,12 +907,13 @@ class BeatSyncNavbar extends HTMLElement {
         const token = localStorage.getItem('token');
         if (!token) return;
         try {
-            const res = await fetch('http://localhost:8080/api/poruke/unread-count', {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            this.updateNotificationBadge(data.count);
+            const [res1, res2] = await Promise.all([
+                fetch('http://localhost:8080/api/poruke/unread-count', { headers: { 'Authorization': 'Bearer ' + token } }),
+                fetch('http://localhost:8080/api/poruke-opreme/unread-count', { headers: { 'Authorization': 'Bearer ' + token } })
+            ]);
+            const d1 = res1.ok ? await res1.json() : { count: 0 };
+            const d2 = res2.ok ? await res2.json() : { count: 0 };
+            this.updateNotificationBadge((d1.count || 0) + (d2.count || 0));
         } catch {}
     }
 
@@ -748,7 +961,8 @@ class BeatSyncNavbar extends HTMLElement {
     _statusLabel(s) {
         const labels = {
             REQUESTED: 'Na čekanju', ACCEPTED: 'Prihvaćeno',
-            IN_PROGRESS: 'U tijeku', COMPLETED: 'Završeno', CANCELLED: 'Otkazano'
+            IN_PROGRESS: 'U tijeku', COMPLETED: 'Završeno',
+            CANCELLED: 'Otkazano', REJECTED: 'Odbijeno'
         };
         return labels[s] || s;
     }
