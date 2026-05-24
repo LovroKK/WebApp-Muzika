@@ -1,0 +1,5 @@
+# Dockerfile i nginx.conf se kopiraju eksplicitno, ostalo je statika.
+Dockerfile
+.dockerignore
+README.md
+.git

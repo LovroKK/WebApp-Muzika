@@ -1,0 +1,8 @@
+# Tajne / environment varijable - NIKAD u git
+.env
+
+# Docker
+
+# OS / IDE
+.DS_Store
+Thumbs.db

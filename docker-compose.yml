@@ -1,0 +1,69 @@
+# BeatSync - kompletna aplikacija u tri kontejnera.
+# Pokretanje:  docker compose up --build
+# Frontend:    http://localhost:8081
+# Backend API: http://localhost:8080
+# Tajne (Stripe, lozinke) se citaju iz .env datoteke u istom folderu.
+
+services:
+  # --- Baza podataka ---
+  mysql:
+    image: mysql:8.3
+    container_name: beatsync-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-webapp_muzika}
+    ports:
+      # Izlaze na 3307 na hostu da NE udari u tvoj lokalni MySQL na 3306.
+      - "3307:3306"
+    volumes:
+      # schema.sql se izvrsi automatski SAMO pri prvom stvaranju baze.
+      - ./backend/docker/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  # --- Spring Boot backend ---
+  backend:
+    build:
+      context: ./backend
+    container_name: beatsync-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Backend zove bazu preko imena servisa "mysql", port 3306 (interni).
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-webapp_muzika}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      SPRING_JPA_DDL_AUTO: validate
+      # Tajne iz .env
+      APP_JWT_SECRET: ${APP_JWT_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      # Stripe - vrijednosti iz .env
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:8081/payment-success.html}
+      STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:8081/payment-cancel.html}
+    ports:
+      - "8080:8080"
+
+  # --- Frontend (nginx) ---
+  frontend:
+    build:
+      context: ./frontend
+    container_name: beatsync-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"
+
+volumes:
+  mysql_data:

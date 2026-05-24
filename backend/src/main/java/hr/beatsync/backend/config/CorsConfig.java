@@ -14,7 +14,9 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:*", "http://127.0.0.1:5500")
+                        // allowedOriginPatterns (NE allowedOrigins) jer koristimo wildcard u portu - allowedOrigins ne podrzava "*" u portu.
+                        // Pokriva Live Server (5500), Docker frontend (8081) i sve lokalne portove.
+                        .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

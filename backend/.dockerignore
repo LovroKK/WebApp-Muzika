@@ -1,0 +1,8 @@
+# Ne kopiraj build artefakte i lokalne stvari u Docker build kontekst
+target/
+.mvn/
+HELP.md
+README.md
+docker/
+*.md
+.git

@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Start-Process \"c:\\\\Users\\\\Lovro\\\\WebApp-Muzika\\\\graphify-out\\\\graph.html\")"
+      "PowerShell(Start-Process \"c:\\\\Users\\\\Lovro\\\\WebApp-Muzika\\\\graphify-out\\\\graph.html\")",
+      "Bash(docker exec *)",
+      "Bash(docker rm *)",
+      "Bash(docker compose *)",
+      "Bash(docker rmi *)"
     ]
   }
 }
