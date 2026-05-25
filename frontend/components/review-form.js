@@ -1,15 +1,13 @@
-// Review form modal — Business korisnik ostavlja recenziju za rezervaciju.
+// Business korisnik ostavlja recenziju za rezervaciju.
 //
 // Otkriva se globalna funkcija openReviewForm(rezervacija, opts).
 //   rezervacija: objekt s idRezervacije, izvodacIme, izvodacPrezime, izvodacUsername, nazivPonude
 //   opts.onSubmitted(recenzijaResponse): callback nakon uspješnog slanja
 //
-// Ovisi o star-rating.js (mountStarPicker) i koristi http://localhost:8080 backend.
+// Ovisi o star-rating.js (mountStarPicker) i o globalnom API_BASE_URL iz config.js.
 
 (function () {
     'use strict';
-
-    const API_BASE = 'http://localhost:8080';
 
     function ensureModalRoot() {
         let root = document.getElementById('reviewFormModalRoot');
@@ -106,7 +104,7 @@
             submitBtn.textContent = 'Šaljem...';
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(API_BASE + '/api/recenzije', {
+                const res = await fetch(`${API_BASE_URL}/recenzije`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

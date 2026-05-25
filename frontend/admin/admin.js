@@ -1,4 +1,5 @@
-const API_BASE = 'http://localhost:8080/api/admin';
+// admin.js je ES modul; API_BASE_URL dolazi s window (postavlja ga components/config.js).
+const API_BASE = `${window.API_BASE_URL}/admin`;
 
 function getToken() {
     return localStorage.getItem('token');

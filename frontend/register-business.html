@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/config.js"></script>
     <script src="components/navbar.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
@@ -110,7 +111,7 @@
             };
 
             try {
-                const response = await fetch('http://localhost:8080/api/auth/register/business', {
+                const response = await fetch(`${API_BASE_URL}/auth/register/business`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -135,7 +136,7 @@
                     const formData = new FormData();
                     formData.append('file', logoFile);
                     try {
-                        const uploadRes = await fetch('http://localhost:8080/api/business/avatar', {
+                        const uploadRes = await fetch(`${API_BASE_URL}/business/avatar`, {
                             method: 'POST',
                             headers: { 'Authorization': 'Bearer ' + token },
                             body: formData
@@ -154,7 +155,7 @@
                     const formData = new FormData();
                     formData.append('file', file);
                     try {
-                        const uploadRes = await fetch('http://localhost:8080/api/business/slike', {
+                        const uploadRes = await fetch(`${API_BASE_URL}/business/slike`, {
                             method: 'POST',
                             headers: { 'Authorization': 'Bearer ' + token },
                             body: formData

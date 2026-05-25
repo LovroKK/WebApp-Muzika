@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/config.js"></script>
     <script src="components/navbar.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
@@ -143,7 +144,7 @@
             if (!token) return;
 
             try {
-                const response = await fetch('http://localhost:8080/api/business/profil', {
+                const response = await fetch(`${API_BASE_URL}/business/profil`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
 
@@ -168,7 +169,7 @@
                 }
 
                 if (p.logoAvatar) {
-                    document.getElementById('avatarImg').src = 'http://localhost:8080' + p.logoAvatar;
+                    document.getElementById('avatarImg').src = API_BASE + p.logoAvatar;
                 } else {
                     document.getElementById('avatarImg').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nazivKluba) + '&background=7c3aed&color=fff&size=128';
                 }
@@ -224,7 +225,7 @@
             };
 
             try {
-                const response = await fetch('http://localhost:8080/api/business/profil', {
+                const response = await fetch(`${API_BASE_URL}/business/profil`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -263,7 +264,7 @@
 
             galerija.innerHTML = p.slikeProstoraIds.map(id => `
                 <div class="relative group">
-                    <img src="http://localhost:8080/api/business/slike/${id}"
+                    <img src="${API_BASE}/api/business/slike/${id}"
                          class="w-full h-32 object-cover rounded cursor-pointer hover:opacity-80"
                          alt="Slika prostora">
                     <button onclick="obrisiSliku(${id})"
@@ -278,7 +279,7 @@
             if (!confirm('Obrisati sliku?')) return;
 
             try {
-                const res = await fetch('http://localhost:8080/api/business/slike/' + id, {
+                const res = await fetch(`${API_BASE_URL}/business/slike/` + id, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -302,7 +303,7 @@
             formData.append('file', file);
 
             try {
-                const res = await fetch('http://localhost:8080/api/business/avatar', {
+                const res = await fetch(`${API_BASE_URL}/business/avatar`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -314,7 +315,7 @@
                 }
 
                 statusEl.textContent = 'Logo uspješno promijenjen!';
-                document.getElementById('avatarImg').src = 'http://localhost:8080/api/business/avatar/' + window._profil.usernameBusiness + '?t=' + Date.now();
+                document.getElementById('avatarImg').src = `${API_BASE_URL}/business/avatar/` + window._profil.usernameBusiness + '?t=' + Date.now();
                 setTimeout(() => statusEl.classList.add('hidden'), 3000);
             } catch (err) {
                 console.error('Logo upload error:', err);
@@ -334,7 +335,7 @@
             formData.append('file', file);
 
             try {
-                const res = await fetch('http://localhost:8080/api/business/slike', {
+                const res = await fetch(`${API_BASE_URL}/business/slike`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData

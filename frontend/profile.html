@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/config.js"></script>
     <script src="components/navbar.js"></script>
     <script src="components/star-rating.js"></script>
 </head>
@@ -162,7 +163,7 @@
             if (!token) return;
 
             try {
-                const response = await fetch('http://localhost:8080/api/izvodac/profil', {
+                const response = await fetch(`${API_BASE_URL}/izvodac/profil`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
 
@@ -187,7 +188,7 @@
                 }
 
                 if (p.logoAvatar) {
-                    document.getElementById('avatarImg').src = 'http://localhost:8080' + p.logoAvatar;
+                    document.getElementById('avatarImg').src = API_BASE + p.logoAvatar;
                 } else {
                     document.getElementById('avatarImg').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.ime + '+' + p.prezime) + '&background=7c3aed&color=fff&size=128';
                 }
@@ -213,7 +214,7 @@
             summary.innerHTML = window.renderStars(avg, count);
 
             try {
-                const res = await fetch('http://localhost:8080/api/recenzije/dj/' + encodeURIComponent(username));
+                const res = await fetch(`${API_BASE_URL}/recenzije/dj/` + encodeURIComponent(username));
                 if (!res.ok) throw new Error();
                 const arr = await res.json();
                 if (arr.length === 0) {
@@ -246,7 +247,7 @@
 
         async function ucitajFavoriteProfil() {
             try {
-                const res = await fetch('http://localhost:8080/api/favoriti', {
+                const res = await fetch(`${API_BASE_URL}/favoriti`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const lista = await res.json();
@@ -311,7 +312,7 @@
             };
 
             try {
-                const response = await fetch('http://localhost:8080/api/izvodac/profil', {
+                const response = await fetch(`${API_BASE_URL}/izvodac/profil`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -350,7 +351,7 @@
             formData.append('file', file);
 
             try {
-                const res = await fetch('http://localhost:8080/api/izvodac/avatar', {
+                const res = await fetch(`${API_BASE_URL}/izvodac/avatar`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
@@ -362,7 +363,7 @@
                 }
 
                 statusEl.textContent = 'Avatar uspješno promijenjen!';
-                document.getElementById('avatarImg').src = 'http://localhost:8080/api/izvodac/avatar/' + window._profil.usernameIzvodac + '?t=' + Date.now();
+                document.getElementById('avatarImg').src = `${API_BASE_URL}/izvodac/avatar/` + window._profil.usernameIzvodac + '?t=' + Date.now();
                 setTimeout(() => statusEl.classList.add('hidden'), 3000);
             } catch (err) {
                 console.error('Avatar upload error:', err);

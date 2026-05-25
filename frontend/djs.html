@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="components/config.js"></script>
     <script src="components/navbar.js"></script>
     <script src="components/star-rating.js"></script>
 </head>
@@ -112,7 +113,7 @@
         async function ucitajFavorite() {
             if (!token) return;
             try {
-                const res = await fetch('http://localhost:8080/api/favoriti', {
+                const res = await fetch(`${API_BASE_URL}/favoriti`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const lista = await res.json();
@@ -123,7 +124,7 @@
         async function toggleFavorit(username, btn) {
             if (!token) return;
             try {
-                const res = await fetch(`http://localhost:8080/api/favoriti/toggle?tipFavorita=IZVODAC&favoritUsername=${username}`, {
+                const res = await fetch(`${API_BASE_URL}/favoriti/toggle?tipFavorita=IZVODAC&favoritUsername=${username}`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -156,7 +157,7 @@
             grid.innerHTML = '<p class="col-span-3 text-center text-gray-400">Učitavanje...</p>';
 
             try {
-                const response = await fetch('http://localhost:8080/api/djs?' + params.toString());
+                const response = await fetch(`${API_BASE_URL}/djs?` + params.toString());
                 let djs = await response.json();
 
                 if (djs.length === 0) {

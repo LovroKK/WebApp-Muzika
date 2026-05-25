@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="components/config.js"></script>
     <script src="components/navbar.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
@@ -49,7 +50,7 @@
             }
 
             try {
-                const res = await fetch('http://localhost:8080/api/favoriti', {
+                const res = await fetch(`${API_BASE_URL}/favoriti`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 sviFavoriti = await res.json();
@@ -62,7 +63,7 @@
 
         async function ukloniFavorit(tipFavorita, favoritUsername, card) {
             try {
-                await fetch(`http://localhost:8080/api/favoriti/toggle?tipFavorita=${tipFavorita}&favoritUsername=${favoritUsername}`, {
+                await fetch(`${API_BASE_URL}/favoriti/toggle?tipFavorita=${tipFavorita}&favoritUsername=${favoritUsername}`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -95,8 +96,8 @@
             const cards = await Promise.all(filtered.map(async f => {
                 try {
                     const endpoint = f.tipFavorita === 'IZVODAC'
-                        ? `http://localhost:8080/api/djs?search=${encodeURIComponent(f.favoritUsername)}`
-                        : `http://localhost:8080/api/business/javni/${encodeURIComponent(f.favoritUsername)}`;
+                        ? `${API_BASE_URL}/djs?search=${encodeURIComponent(f.favoritUsername)}`
+                        : `${API_BASE_URL}/business/javni/${encodeURIComponent(f.favoritUsername)}`;
 
                     if (f.tipFavorita === 'IZVODAC') {
                         const res = await fetch(endpoint);

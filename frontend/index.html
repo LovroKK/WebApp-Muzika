@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="components/config.js"></script>
     <script src="components/navbar.js"></script>
     <script src="components/star-rating.js"></script>
 </head>
@@ -121,12 +122,12 @@
         feather.replace();
 
         const INDEX_DEFAULT_AVATAR = 'https://ui-avatars.com/api/?background=7c3aed&color=fff&size=128';
-        const INDEX_DEFAULT_IMAGE  = 'http://localhost:8080/api/equipment/default-image';
+        const INDEX_DEFAULT_IMAGE  = `${API_BASE_URL}/equipment/default-image`;
 
         async function ucitajDjeve() {
             const grid = document.getElementById('djGrid');
             try {
-                const res = await fetch('http://localhost:8080/api/djs');
+                const res = await fetch(`${API_BASE_URL}/djs`);
                 if (!res.ok) throw new Error();
                 const djs = await res.json();
 
@@ -180,7 +181,7 @@
             const grid = document.getElementById('opremaGrid');
             const DEFAULT_IMG = 'https://via.placeholder.com/400x200/1f2937/9ca3af?text=Oprema';
             try {
-                const res = await fetch('http://localhost:8080/api/equipment');
+                const res = await fetch(`${API_BASE_URL}/equipment`);
                 if (!res.ok) throw new Error();
                 const lista = await res.json();
 
@@ -197,7 +198,7 @@
                     const naziv   = op.nazivOpreme ?? op.naziv_opreme ?? 'Oprema';
                     const kat     = op.kategorija ?? '—';
                     const cijena  = op.cijena ? Number(op.cijena).toFixed(2).replace('.00', '') : '0';
-                    const slika   = op.slika ? 'http://localhost:8080' + op.slika : DEFAULT_IMG;
+                    const slika   = op.slika ? API_BASE + op.slika : DEFAULT_IMG;
                     const lokacije = Array.isArray(op.lokacije) && op.lokacije.length
                         ? op.lokacije.join(', ')
                         : 'Lokacija nije navedena';

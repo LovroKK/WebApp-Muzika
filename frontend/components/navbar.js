@@ -392,7 +392,7 @@ class BeatSyncNavbar extends HTMLElement {
 
         try {
             if (this._currentTab === 'OPREMA') {
-                const res = await fetch('http://localhost:8080/api/poruke-opreme/inbox', {
+                const res = await fetch(`${API_BASE_URL}/poruke-opreme/inbox`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const items = await res.json();
@@ -403,7 +403,7 @@ class BeatSyncNavbar extends HTMLElement {
             if (role === 'BUSINESS') {
                 this.querySelector('#chatTabBar').style.display = 'flex';
                 const type = this._currentTab;
-                const res = await fetch(`http://localhost:8080/api/poruke/inbox?type=${type}`, {
+                const res = await fetch(`${API_BASE_URL}/poruke/inbox?type=${type}`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const items = await res.json();
@@ -413,7 +413,7 @@ class BeatSyncNavbar extends HTMLElement {
                     this._renderRazgovori(items);
                 }
             } else {
-                const res = await fetch('http://localhost:8080/api/poruke/inbox?type=RAZGOVORI', {
+                const res = await fetch(`${API_BASE_URL}/poruke/inbox?type=RAZGOVORI`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const items = await res.json();
@@ -451,7 +451,7 @@ class BeatSyncNavbar extends HTMLElement {
                 e.stopPropagation();
                 const rezId = parseInt(btn.dataset.rez);
                 const token = localStorage.getItem('token');
-                await fetch(`http://localhost:8080/api/poruke/otvori-chat/${rezId}`, {
+                await fetch(`${API_BASE_URL}/poruke/otvori-chat/${rezId}`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -464,7 +464,7 @@ class BeatSyncNavbar extends HTMLElement {
                 e.stopPropagation();
                 const rezId = parseInt(btn.dataset.rez);
                 const token = localStorage.getItem('token');
-                await fetch(`http://localhost:8080/api/rezervacije/${rezId}/otkazi`, {
+                await fetch(`${API_BASE_URL}/rezervacije/${rezId}/otkazi`, {
                     method: 'PUT',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -544,7 +544,7 @@ class BeatSyncNavbar extends HTMLElement {
                 e.stopPropagation();
                 const najamId = parseInt(btn.dataset.najam);
                 const token = localStorage.getItem('token');
-                await fetch(`http://localhost:8080/api/poruke-opreme/otvori-chat/${najamId}`, {
+                await fetch(`${API_BASE_URL}/poruke-opreme/otvori-chat/${najamId}`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -557,7 +557,7 @@ class BeatSyncNavbar extends HTMLElement {
                 e.stopPropagation();
                 const najamId = parseInt(btn.dataset.najam);
                 const token = localStorage.getItem('token');
-                await fetch(`http://localhost:8080/api/najam-opreme/${najamId}/odbij`, {
+                await fetch(`${API_BASE_URL}/najam-opreme/${najamId}/odbij`, {
                     method: 'PUT',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -592,10 +592,10 @@ class BeatSyncNavbar extends HTMLElement {
 
         try {
             const [porukeRes, najamRes] = await Promise.all([
-                fetch(`http://localhost:8080/api/poruke-opreme?najam=${najamId}`, {
+                fetch(`${API_BASE_URL}/poruke-opreme?najam=${najamId}`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 }),
-                fetch(`http://localhost:8080/api/najam-opreme`, {
+                fetch(`${API_BASE_URL}/najam-opreme`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 })
             ]);
@@ -635,7 +635,7 @@ class BeatSyncNavbar extends HTMLElement {
         btnPrihvati.style.padding = '6px 14px';
         btnPrihvati.textContent = 'Prihvati zahtjev';
         btnPrihvati.addEventListener('click', async () => {
-            await fetch(`http://localhost:8080/api/najam-opreme/${najam.idNajma}/prihvati`, {
+            await fetch(`${API_BASE_URL}/najam-opreme/${najam.idNajma}/prihvati`, {
                 method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
             });
             this._loadEquipmentConversation();
@@ -647,7 +647,7 @@ class BeatSyncNavbar extends HTMLElement {
         btnOdbij.style.padding = '6px 14px';
         btnOdbij.textContent = 'Odbij zahtjev';
         btnOdbij.addEventListener('click', async () => {
-            await fetch(`http://localhost:8080/api/najam-opreme/${najam.idNajma}/odbij`, {
+            await fetch(`${API_BASE_URL}/najam-opreme/${najam.idNajma}/odbij`, {
                 method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
             });
             await this._showInbox();
@@ -693,10 +693,10 @@ class BeatSyncNavbar extends HTMLElement {
 
         try {
             const [porukeRes, rezRes] = await Promise.all([
-                fetch(`http://localhost:8080/api/poruke?rezervacija=${rezId}`, {
+                fetch(`${API_BASE_URL}/poruke?rezervacija=${rezId}`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 }),
-                fetch(`http://localhost:8080/api/rezervacije`, {
+                fetch(`${API_BASE_URL}/rezervacije`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 })
             ]);
@@ -738,7 +738,7 @@ class BeatSyncNavbar extends HTMLElement {
                 btnPotvrdi.style.padding = '6px 14px';
                 btnPotvrdi.textContent = 'Potvrdi suradnju';
                 btnPotvrdi.addEventListener('click', async () => {
-                    await fetch(`http://localhost:8080/api/rezervacije/${rez.idRezervacije}/potvrdi`, {
+                    await fetch(`${API_BASE_URL}/rezervacije/${rez.idRezervacije}/potvrdi`, {
                         method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
                     });
                     this._loadConversation();
@@ -756,7 +756,7 @@ class BeatSyncNavbar extends HTMLElement {
             btnOdbij.style.padding = '6px 14px';
             btnOdbij.textContent = 'Odbij prijavu';
             btnOdbij.addEventListener('click', async () => {
-                await fetch(`http://localhost:8080/api/rezervacije/${rez.idRezervacije}/otkazi`, {
+                await fetch(`${API_BASE_URL}/rezervacije/${rez.idRezervacije}/otkazi`, {
                     method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
                 });
                 await this._showInbox();
@@ -772,7 +772,7 @@ class BeatSyncNavbar extends HTMLElement {
                 btnPotvrdi.style.padding = '6px 14px';
                 btnPotvrdi.textContent = 'Potvrdi suradnju';
                 btnPotvrdi.addEventListener('click', async () => {
-                    await fetch(`http://localhost:8080/api/rezervacije/${rez.idRezervacije}/potvrdi`, {
+                    await fetch(`${API_BASE_URL}/rezervacije/${rez.idRezervacije}/potvrdi`, {
                         method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
                     });
                     this._loadConversation();
@@ -816,7 +816,7 @@ class BeatSyncNavbar extends HTMLElement {
         try {
             if (this._currentConvType === 'OPREMA') {
                 if (!this._currentNajam) return;
-                await fetch('http://localhost:8080/api/poruke-opreme', {
+                await fetch(`${API_BASE_URL}/poruke-opreme`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sadrzajPoruke: text, najamId: this._currentNajam })
@@ -824,7 +824,7 @@ class BeatSyncNavbar extends HTMLElement {
                 await this._loadEquipmentConversation();
             } else {
                 if (!this._currentRezervacija) return;
-                await fetch('http://localhost:8080/api/poruke', {
+                await fetch(`${API_BASE_URL}/poruke`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sadrzajPoruke: text, idRezervacije: this._currentRezervacija })
@@ -908,8 +908,8 @@ class BeatSyncNavbar extends HTMLElement {
         if (!token) return;
         try {
             const [res1, res2] = await Promise.all([
-                fetch('http://localhost:8080/api/poruke/unread-count', { headers: { 'Authorization': 'Bearer ' + token } }),
-                fetch('http://localhost:8080/api/poruke-opreme/unread-count', { headers: { 'Authorization': 'Bearer ' + token } })
+                fetch(`${API_BASE_URL}/poruke/unread-count`, { headers: { 'Authorization': 'Bearer ' + token } }),
+                fetch(`${API_BASE_URL}/poruke-opreme/unread-count`, { headers: { 'Authorization': 'Bearer ' + token } })
             ]);
             const d1 = res1.ok ? await res1.json() : { count: 0 };
             const d2 = res2.ok ? await res2.json() : { count: 0 };

@@ -1,4 +1,4 @@
-const EQUIPMENT_API_BASE_URL = 'http://localhost:8080/api';
+const EQUIPMENT_API_BASE_URL = `${API_BASE_URL}`;
 const EQUIPMENT_DEFAULT_IMAGE = 'http://static.photos/technology/200x200/0';
 
 let equipmentApiListings = [];
@@ -170,7 +170,7 @@ function renderEquipmentPageApi() {
             const id = listing.id_opreme;
             const naziv = escapeHtml(listing.naziv_opreme || 'Nepoznata oprema');
             const kategorija = escapeHtml(listing.kategorija || 'Ostalo');
-            const slika = listing.slika ? 'http://localhost:8080' + listing.slika : EQUIPMENT_DEFAULT_IMAGE;
+            const slika = listing.slika ? API_BASE + listing.slika : EQUIPMENT_DEFAULT_IMAGE;
             const lokacije = Array.isArray(listing.lokacije) && listing.lokacije.length
                 ? listing.lokacije.map((lokacija) => escapeHtml(lokacija)).join(', ')
                 : 'Lokacija nije navedena';
