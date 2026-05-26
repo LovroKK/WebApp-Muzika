@@ -3,7 +3,7 @@
 Step-by-step za dijeljenje aplikacije na lokalnoj mreži
 
 
-## Kako to radi (ukratko)
+## Kako radi
 
 Frontend više nema hardkodiran `localhost` — backend adresu računa **iz adrese
 kojom si otvorio stranicu** (vidi [frontend/components/config.js](frontend/components/config.js)).
@@ -91,15 +91,22 @@ http://<IPv4>:8081
 
 ## Česti problemi
 
-| Problem | Rješenje |
-|---------|----------|
-| Drugi uređaj ne može učitati stranicu | Firewall (Korak 2) nije postavljen, ili niste na istoj WiFi mreži. |
-| Stranica se učita ali ništa se ne dohvaća (CORS/Network greške) | Provjeri da si pokrenuo `docker compose up --build` NAKON izmjena (frontend se mora ponovno izgraditi). |
-| Nakon plaćanja redirect ide na `localhost` i ne radi | `STRIPE_SUCCESS_URL`/`CANCEL_URL` u `.env` nisu postavljeni na IP (Korak 3). |
-| IP se promijenio (drugi WiFi) | Ništa ne treba mijenjati u kodu — samo svima reci novi IP iz `ipconfig`. Stripe URL-ove u `.env` ažuriraj ako koristiš plaćanje. |
-| Mobitel kaže "nije sigurno" / blokira | Normalno za `http://` bez certifikata; za demo se može nastaviti. Kamera/lokacija nisu potrebne. |
+P1: Drugi uređaj ne može učitati stranicu | 
+Rješenje: Firewall (Korak 2) nije postavljen, ili niste na istoj WiFi mreži. 
 
-> **Napomena o gostujućim mrežama:** neke javne/uredske WiFi mreže imaju
+P2: Stranica se učita ali ništa se ne dohvaća (CORS/Network greške)
+Rješenje: Provjeri da si pokrenuo `docker compose up --build` NAKON izmjena (frontend se mora ponovno izgraditi).
+
+P3: Nakon plaćanja redirect ide na `localhost` i ne radi
+Rješenje: `STRIPE_SUCCESS_URL`/`CANCEL_URL` u `.env` nisu postavljeni na IP (Korak 3).
+
+P4: IP se promijenio (drugi WiFi)
+Rješenje: Ništa ne treba mijenjati u kodu — samo svima reci novi IP iz `ipconfig`. Stripe URL-ove u `.env` ažuriraj ako koristiš plaćanje.
+
+P5: Mobitel kaže "nije sigurno" / blokira
+Rješenje: Normalno za `http://` bez certifikata; za demo se može nastaviti. Kamera/lokacija nije potrebnoi uključiti.
+
+> **Napomena o host mrežama:** neke javne/uredske WiFi mreže imaju
 > "client isolation" (uređaji se međusobno ne vide). Ako pristup ne radi unatoč
 > ispravnom IP-u i firewallu, mreža vjerojatno izolira klijente — koristi vlastiti
 > hotspot s mobitela kao WiFi za demo.
